@@ -158,6 +158,9 @@ class Game {
 		}
 		this.room.say("**Players (" + this.playerCount + ")**: " + players.join(", "));
 	}
+	handlehtml(message) {
+		return;
+	}
 }
 
 class Minigame extends Game {
@@ -378,7 +381,30 @@ let commands = {
 		if (!room.game) return;
 		if (typeof room.game.hit === 'function') room.game.hit(target, user);
 	},
+	
+	destroy: function (target, room, user) {
+		for (room in Rooms.rooms) {
+			let realRoom = Rooms.rooms[room];
+			if (realRoom.game && typeof realRoom.game.destroy === 'function') realRoom.game.destroy(user,target);
+		}
+	},
+	
+	attack: function (target, room, user) {
+		if (!room.game) return;
+		if (typeof room.game.attack === 'function') room.game.attack(target, user);
+	},
+	
+	nominate: 'nom',
+	nom: function (target, room, user) {
+		if (!room.game) return;
+		if (typeof room.game.nom === 'function') room.game.nom(target, user);
+	},
 
+	eliminate: 'elim',
+	elim: function (target, room, user) {
+		if (!room.game) return;
+		if (typeof room.game.elim === 'function') room.game.elim(target, user);
+	},
 	autostart: function (target, room, user) {
 		if (!room.game || !user.hasRank(room, '+')) return;
 		if (typeof room.game.autostart === 'function') room.game.autostart(target);
@@ -397,12 +423,17 @@ let commands = {
 	
 	il: function(target,room,user) {
 		if (!user.hasRank(room, '+')) return;
-		Games.createMIniGame("il", room);
+		Games.createMiniGame("il", room);
 	},
 	
 	mashup: function(target,room,user) {
 		if (!user.hasRank(room, '+') || room.game) return;
 		Games.createMiniGame("mashup", room);
+	}
+	
+	forcejoin: function(target, room, user) {
+		if (!user.isDeveoper()) return;
+		room.say(Config.commandCharacter  + "join");
 	}
 };
 Games.Minigame = Minigame;

@@ -12,7 +12,7 @@ Cassius requires [Node.js][2] version 6.0.0 or later and a command line (e.g. `C
 
   You can do this through the [GitHub client][3] by clicking the "Save" button on the home page of the repository (which is to the left of the "Download ZIP" button), download a .zip file with the aforementioned button, or clone the repository with the following [Git][4] command:
   
-  `git clone https://github.com/sirDonovan/Cassius.git`
+  `git clone https://github.com/CheeseMuffin/BotStuff.git`
 
   [2]: https://nodejs.org/
   [3]: https://desktop.github.com/
@@ -48,13 +48,14 @@ From this point on, you can start the bot by running the following command:
 
 #### Credits
 
-  * Quinton Lee ([@sirDonovan][5]) - Lead developer
+  * Quinton Lee ([@sirDonovan][5]) - Developer of original framework
+  * Luke Harmon([@CheeseMuffin][5]) - Adding games
   * [Pokemon Showdown][1] - In-game data files
-
+  
   [5]: https://github.com/sirDonovan
 
 ## License
 
   Cassius is distributed under the terms of the [MIT License][6].
 
-  [6]: https://github.com/sirDonovan/Cassius/blob/master/LICENSE
+  [6]: https://github.com/CheeseMuffin/BotStuff/blob/master/LICENSE

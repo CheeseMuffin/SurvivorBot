@@ -11,8 +11,8 @@
 
 const name = "Politoed's Port Chain";
 const id = Tools.toId(name);
-const description = "Guess a Pokemon that shares 2 - 4 letters with the beginning or end of the given Pokemon. **Command:** ``";
-const data = [];
+const description = "Guess a Pokemon that shares 2 - 4 letters with the beginning or end of the given Pokemon. **Command:** ``" + Config.commandCharacter + "g [mon]``";
+const data = {};
 
 function isPort(mon1, mon2) {
 	for (let i = 2; i < Math.min(mon1.length, mon2.length, 5); i++) {
@@ -27,13 +27,12 @@ function isPort(mon1, mon2) {
 for (let i in Tools.data.pokedex) {
 	let mon1 = Tools.data.pokedex[i];
 	if (!mon1.species || mon1.num < 1) continue;
+	data[mon1.species] = [];
 	for (let j in Tools.data.pokedex){
 		let mon2 = Tools.data.pokedex[j];
 		if (!mon2.species || mon2.num < 0) continue;
 		if (i !== j && isPort(i, j)) {
-			data.push(mon1.species);
-			//console.log(mon1.species, mon2.species);
-			break;
+			data[mon1.species].push(mon2.species);
 		}
 	}
 }
@@ -58,6 +57,26 @@ class PPC extends Games.Game {
 		this.nextRound();
 	}
 	
+	valid() {
+		for (let i = 0; i < data[this.curMon].length; i++) {
+			let j;
+			for (j = 0; j < this.curUsed.length; j++) {
+				if (Tools.toId(this.curUsed[j]) === Tools.toId(data[this.curMon][i])) {
+					break;
+				}
+			}
+			if (j === this.curUsed.length) return true;
+		}
+		return false;
+	}
+	chooseMon() {
+		while (true) {
+			this.curMon = Object.keys(data)[Math.floor(Math.random() * Object.keys(data).length)];
+			console.log(this.curMon);
+			if (this.valid()) break;
+		}
+	}
+	
 	onNextRound() {		
 	
 		if (this.playerCount === 1) {
@@ -79,7 +98,8 @@ class PPC extends Games.Game {
 		}
 		this.guessed = true;
 		this.curPlayer = null;
-		this.curMon = data[Math.floor(Math.random() * data.length)];
+		this.chooseMon();
+		//this.curMon = "Axew";
 		this.order = Tools.shuffle(Object.keys(this.players));
 		this.say("**Round " + this.round + "**!");
 		this.pl();
@@ -101,7 +121,16 @@ class PPC extends Games.Game {
 			this.curPlayer = this.players[userID];
 			this.order.splice(0, 1);
 			this.guessed = false;
-			this.say(this.curPlayer.name + " you're up! The Politoed spelled out " + this.curMon);
+			console.log(data[this.curMon]);
+			console.log(this.curUsed);
+			if (!this.valid()) {
+				this.chooseMon();
+				this.say("No mons left! **" +this.curPlayer.name + "** you're up! The Politoed randomly chose " + this.curMon);
+			}
+			else {
+				
+				this.say("**" + this.curPlayer.name + "** you're up! The Politoed spelled out " + this.curMon);
+			}
 			this.timeout = setTimeout(() => this.nextPlayer(), (10 - this.round/20) * 1000);
 		}
 	}

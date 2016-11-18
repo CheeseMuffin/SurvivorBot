@@ -76,7 +76,7 @@ class ILL extends Games.Game {
 			let answers = this.answers.length;
 			this.say("Time's up! The answer" + (answers > 1 ? "s were:" : " was") + " __" + this.answers.join(", ") + "__");
 		}
-		this.category = "Pokemon";//this.categories[Math.floor(Math.random() * this.categories.length)];
+		this.category = "Pokemon Moves";//this.categories[Math.floor(Math.random() * this.categories.length)];
 		let x = Math.floor(Math.random() * data[this.category].length);
 		let answer = this.convert(data[this.category][x]);
 		this.answers = [];

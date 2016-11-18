@@ -60,7 +60,6 @@ class Room {
 	html(message) {
 		if (!message) return;
 		Client.send(this.clientId + " |!htmlbox " + message);
-		console.log(this.clientId + " |!htmlbox " + message);
 		Client.send(this.clientId + '|' + '/asdf');
 	}
 	parseMessage(messageType, splitMessage) {
@@ -99,6 +98,12 @@ class Room {
 			if (user.rooms.get(this) !== rank) user.rooms.set(this, rank);
 			if (user.id === Users.self.id) return;
 			CommandParser.parse(splitMessage.slice(2).join('|'), this, user, splitMessage[0] * 1000);
+			break;
+		
+		case 'html':
+			if (this.game) {
+				this.game.handlehtml(splitMessage);
+			}
 			break;
 		}
 	}
