@@ -61,7 +61,9 @@ for (let i in Tools.data.pokedex) {
 		data[species]["Pokemon Moves"].push.apply(data[species]["Pokemon Moves"], data[monForms[i]]["Pokemon Moves"]);
 	}
 	data[species]["generation"] = [generation(mon.num)];
-	data[species]["tier"] = [Tools.data.battle[i].tier];
+	if (Tools.data.battle[i]) {
+		data[species]["tier"] = [Tools.data.battle[i].tier];
+	}
 }
 
 class Excluded extends Games.Game {

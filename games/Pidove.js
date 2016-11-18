@@ -47,11 +47,11 @@ class Pidove extends Games.Game {
 		}
 		this.numNominations = 0;
 	}
-	
+
 	onStart() {
 		this.nextRound();
 	}
-	
+
 	nextRound() {
 		if (this.playerCount === 1) {
 			this.say("**Winner:** " + this.players[Object.keys(this.players)[0]].name);
@@ -68,7 +68,7 @@ class Pidove extends Games.Game {
 		this.say("Please begin nominating players! **Command:** ``" + Config.commandCharacter + "nom [user]``");
 		this.timeout = setTimeout(() => this.nominatePlayer(), 30 * 1000);
 	}
-	
+
 	nominatePlayer() {
 		this.canNom = false;
 		let bestPlayers = [];
@@ -79,8 +79,7 @@ class Pidove extends Games.Game {
 			if (!points) continue;
 			if (points === numNoms) {
 				bestPlayers.push(player);
-			}
-			else if (points > numNoms) {
+			} else if (points > numNoms) {
 				bestPlayers = [player];
 				numNoms = points;
 			}
@@ -88,13 +87,11 @@ class Pidove extends Games.Game {
 		if (bestPlayers.length === 1) {
 			this.curPlayer = bestPlayers[0];
 			this.say(this.curPlayer.name + " was nominated to go next!");
-		}
-		else if (bestPlayers.length > 1) {
+		} else if (bestPlayers.length > 1) {
 			console.log(bestPlayers.length);
 			this.curPlayer = bestPlayers[Math.floor(Math.random() * bestPlayers.length)];
 			this.say("Voting resulted in a tie, and " + this.curPlayer.name + " was randomly chosen to go next!");
-		}
-		else {
+		} else {
 			this.curPlayer = this.players[Object.keys(this.players)[Math.floor(Math.random() * Object.keys(this.players).length)]];
 			this.say("Nobody was nominated, so we randomly picked " + this.curPlayer.name + " to go next!");
 		}
@@ -102,7 +99,7 @@ class Pidove extends Games.Game {
 		this.answers = null;
 		this.nextQuestion();
 	}
-	
+
 	nextQuestion() {
 		if (this.answers) {
 			let answers = this.answers.length;
@@ -112,8 +109,7 @@ class Pidove extends Games.Game {
 			this.answers = null;
 			this.playerCount--;
 			this.timeout = setTimeout(() => this.nextRound(), 5 * 1000);
-		}
-		else {
+		} else {
 			let category = this.categories[Math.floor(Math.random() * this.categories.length)];
 			let question = this.questions[category][Math.floor(Math.random() * this.questions[category].length)];
 			this.answers = data[category][question];
@@ -121,7 +117,7 @@ class Pidove extends Games.Game {
 			this.timeout = setTimeout(() => this.nextQuestion(), 10 * 1000);
 		}
 	}
-	
+
 	guess(guess, user) {
 		if (!this.curPlayer || this.curPlayer.id !== user.id) return;
 		if (!this.answers) return;
@@ -140,40 +136,36 @@ class Pidove extends Games.Game {
 		let points = this.points.get(player) || 0;
 		points += 1;
 		this.points.set(player, points);
-		
 		if (points >= this.maxPoints) {
 			this.say("Correct! " + user.name + " wins the game! (Answer" + (this.answers.length > 1 ? "s" : "") + ": __" + this.answers.join(", ") + "__)");
 			this.say(user.name + " please choose someone to eliminate! **Command:** ``" + Config.commandCharacter + "elim [user]``");
 			this.canElim = true;
 			this.timeout = setTimeout(() => this.elimPlayer(null), 15 * 1000);
-		}
-		else {
+		} else {
 			this.say("Correct! " + user.name + " advances to " + points + " point" + (points > 1 ? "s" : "") + ". (Answer" + (this.answers.length > 1 ? "s" : "") + ": __" + this.answers.join(", ") + "__)");
 			this.answers = null;
 			this.timeout = setTimeout(() => this.nextQuestion(), 5 * 1000);
 		}
 	}
-	
+
 	elimPlayer(target) {
 		if (!target) {
 			let possibleElims = [];
 			for (let userID in this.player) {
 				let player = this.players[userID];
 				if (this.nominations.get(player) !== this.curPlayer) continue;
-					possibleElims.push(player);
+				possibleElims.push(player);
 			}
 			let elimPlayer;
-			if (possibleElims.length == 0) {
+			if (possibleElims.length === 0) {
 				elimPlayer = this.players[Object.keys(this.players)[Math.floor(Math.random() * Object.keys(this.players).length)]];
-			}
-			else {
+			} else {
 				elimPlayer = possibleElims[Math.floor(Math.random() * possibleElims.length)];
 			}
 			this.say(this.curPlayer.name + " did not choose someone to eliminate, and so we randomly chose " + elimPlayer.name + " to be eliminated!");
 			delete this.players[elimPlayer.id];
 			this.playerCount--;
-		}
-		else {
+		} else {
 			this.say(target.name + " was eliminated!");
 			this.playerCount--;
 			delete this.players[target.id];
@@ -181,7 +173,7 @@ class Pidove extends Games.Game {
 		this.canElim = false;
 		this.timeout = setTimeout(() => this.nextRound(), 5 * 1000);
 	}
-	
+
 	nom(target, user) {
 		if (!this.canNom) return;
 		let player = this.players[user.id];
@@ -199,7 +191,7 @@ class Pidove extends Games.Game {
 			this.nominatePlayer();
 		}
 	}
-	
+
 	elim(target, user) {
 		if (!this.canElim || user.id !== this.curPlayer.id) return;
 		console.log("hi");

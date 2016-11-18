@@ -37,10 +37,9 @@ class Ponyta extends Games.Game {
 
 	explodePinata() {
 		this.say("The Piñata broke!");
-		if (this.num === 0) { 
+		if (this.num === 0) {
 			this.say("Nobody hit the Piñata this round!");
-		}
-		else {
+		} else {
 			for (let userID in this.players) {
 				let player = this.players[userID];
 				let guessNum = this.guessed.get(player);
@@ -58,7 +57,7 @@ class Ponyta extends Games.Game {
 		let player = this.players[user.id];
 		let guess = this.guessed.get(player);
 		if (guess) return;
-		this.guessed.set(player, this.num+1);
+		this.guessed.set(player, this.num + 1);
 		this.num++;
 	}
 }

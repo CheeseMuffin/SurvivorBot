@@ -99,7 +99,7 @@ class Room {
 			if (user.id === Users.self.id) return;
 			CommandParser.parse(splitMessage.slice(2).join('|'), this, user, splitMessage[0] * 1000);
 			break;
-		
+
 		case 'html':
 			if (this.game) {
 				this.game.handlehtml(splitMessage);

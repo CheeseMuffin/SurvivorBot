@@ -8,10 +8,17 @@ const data = {
 	"Pokemon Moves" : [],
 	"Pokemon Items" : [],
 	"Pokemon Abilities": [],
+	"Pokemon": [],
 };
 
 data["Pokemon Characters"] = Tools.data.characters;
 data["Pokemon Locations"] = Tools.data.locations;
+
+for (let i in Tools.data.pokedex) {
+	let mon = Tools.data.pokedex[i];
+	if (!mon.species || mon.num < 1) continue;
+	data["Pokemon"].push(mon.species);
+}
 
 for (let i in Tools.data.moves) {
 	let move = Tools.data.moves[i];
@@ -41,7 +48,7 @@ class Anagrams extends Games.Game {
 		this.category = null;
 		this.answer = null;
 		this.points = new Map();
-		this.categories = Object.keys(data)
+		this.categories = Object.keys(data);
 		this.maxPoints = 100;
 	}
 

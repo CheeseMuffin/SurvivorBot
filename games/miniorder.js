@@ -38,7 +38,7 @@ class Order extends Games.Minigame {
 		this.locations = [];
 		this.category = null;
 	}
-	
+
 	onSignups() {
 		this.nextRound();
 	}
@@ -61,7 +61,6 @@ class Order extends Games.Minigame {
 			this.locations.push(other[value]);
 			this.locations.sort(function (a, b) {return a - b;});
 			let str = "";
-			
 			for (let i = 0; i < this.locations.length; i++) {
 				str += this.answer[this.locations[i]];
 			}

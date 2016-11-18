@@ -4,22 +4,22 @@ const name = 'Buneary\'s Bountiful Buffet';
 const id = Tools.toId(name);
 const description = 'Players try and choose the tables for maximum points, but tables picked by multiple people are shared! **Command:** ``' + Config.commandCharacter + 'choose [table]`` (in pms)';
 
-const data = ["Chansey Eggs", 
-			  "Slowpoke Tails", 
+const data = ["Chansey Eggs",
+			  "Slowpoke Tails",
 			  "Tropius Fruit",
-			  "Moomoo Milk", 
-			  "Combee Honey", 
-			  "Shuckle Juice", 
-			  "Farfetch'd Breast", 
-			  "Cooked Magikarp", 
-			  "Octillery Tentacle", 
-			  "Basculin Fillet", 
+			  "Moomoo Milk",
+			  "Combee Honey",
+			  "Shuckle Juice",
+			  "Farfetch'd Breast",
+			  "Cooked Magikarp",
+			  "Octillery Tentacle",
+			  "Basculin Fillet",
 			  "Cherubi Balls"];
-			  
+
 const acronyms = {"ce": "Chansey Eggs",
 				  "st": "Slowpoke Tails",
 				  "tf": "Tropius Fruit",
-				  "ch": "Moomoo Milk",
+				  "mo": "Moomoo Milk",
 				  "ch": "Combee Honey",
 				  "sj": "Shuckle Juice",
 				  "fb": "Farfetch'd Breast",
@@ -37,11 +37,11 @@ class Buneary extends Games.Game {
 		this.guesses = new Map();
 		this.points = new Map();
 	}
-	
+
 	onStart() {
 		this.nextRound();
 	}
-	
+
 	onNextRound() {
 		if (this.tables) {
 			let counts = [];
@@ -58,10 +58,9 @@ class Buneary extends Games.Game {
 				let index = this.guesses.get(player);
 				if (!index && index !== 0) {
 					player.say("You didn't choose a table this round!");
-				}
-				else {
+				} else {
 					let points = this.points.get(player) || 0;
-					let earnedPoints = Math.floor(this.tables[index]/counts[index])
+					let earnedPoints = Math.floor(this.tables[index] / counts[index]);
 					player.say("You earned " + earnedPoints + " points this round!");
 					this.points.set(player, points + earnedPoints);
 				}
@@ -82,8 +81,7 @@ class Buneary extends Games.Game {
 			}
 			if (!bestPlayer) {
 				this.say("Noone earned any points this game");
-			}
-			else {
+			} else {
 				this.say("The winner is **" + bestPlayer.name + "** with " + maxPoints + " points!");
 			}
 			this.end();
@@ -103,8 +101,8 @@ class Buneary extends Games.Game {
 		this.say("**Round " + this.round + "!** Current Tables: " + strs.join(", "));
 		this.timeout = setTimeout(() => this.nextRound(), 30 * 1000);
 	}
-	
-	choose(user,target) {
+
+	choose(user, target) {
 		let userID = user.id;
 		let player = this.players[userID];
 		if (!player || this.guesses.get(player) || this.guesses.get(player) > -1) return;

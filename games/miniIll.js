@@ -8,7 +8,7 @@ const data = {
 	"Pokemon Moves" : [],
 	"Pokemon Items" : [],
 	"Pokemon Abilities": [],
-	"Pokemon": []
+	"Pokemon": [],
 };
 
 data["Pokemon Characters"] = Tools.data.characters;
@@ -51,20 +51,20 @@ class IL extends Games.Minigame {
 		this.categories = Object.keys(data);
 		this.category = null;
 	}
-	
+
 	onSignups() {
 		this.nextRound();
 	}
-	
+
 	isVowel(ch) {
-		let vowels = ["a","e","i","o","u", " "];
+		let vowels = ["a", "e", "i", "o", "u", " "];
 		return (vowels.indexOf(Tools.toId(ch)) !== -1);
 	}
-	
+
 	convert(str) {
 		let newstr = "";
 		str = Tools.toId(str);
-		for (let i = 0; i <  str.length; i++) {
+		for (let i = 0; i < str.length; i++) {
 			if (this.isVowel(str.charAt(i))) {
 				newstr += str.charAt(i);
 			}
@@ -91,7 +91,7 @@ class IL extends Games.Minigame {
 		this.timeout = setTimeout(() => this.nextRound(), 20 * 1000);
 		console.log(this.timeout);
 	}
-	
+
 	guess(guess, user) {
 		if (!this.answers) return;
 		guess = Tools.toId(guess);

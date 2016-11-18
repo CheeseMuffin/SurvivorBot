@@ -39,7 +39,9 @@ for (let i in Tools.data.pokedex) {
 		return mon.abilities[key];
 	});
 	data[species]["generation"] = [generation(mon.num)];
-	data[species]["tier"] = [Tools.data.battle[i].tier];
+	if (Tools.data.battle[i]) {
+		data[species]["tier"] = [Tools.data.battle[i].tier];
+	}
 }
 class Pancham extends Games.Game {
 	constructor(room) {

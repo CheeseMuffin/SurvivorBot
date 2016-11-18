@@ -38,7 +38,6 @@ class Context {
 			target = this.target;
 		}
 		try {
-			
 			Commands[command].call(this, target, this.room, this.user, this.command, this.time);
 		} catch (e) {
 			let stack = e.stack;
@@ -57,7 +56,6 @@ class CommandParser {
 	parse(message, room, user, time) {
 		message = message.trim();
 		if (message.charAt(0) !== Config.commandCharacter) return;
-		
 		message = message.substr(1);
 		let spaceIndex = message.indexOf(' ');
 		let target = '';

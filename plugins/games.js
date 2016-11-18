@@ -169,7 +169,7 @@ class Minigame extends Game {
 		this.freeJoin = true;
 		this.minigame = true;
 	}
-	
+
 	signups() {
 		this.say(this.description);
 		if (typeof this.onSignups === 'function') this.onSignups();
@@ -187,7 +187,7 @@ class Plugin {
 	}
 
 	loadGames() {
-		Object.keys(require.cache).forEach(function(key) { delete require.cache[key] })
+		Object.keys(require.cache).forEach(function (key) { delete require.cache[key]; });
 		let games;
 		try {
 			games = fs.readdirSync('./games');
@@ -200,8 +200,8 @@ class Plugin {
 			if (file.game && file.name && file.id) this.games[file.id] = file;
 		}
 	}
-	
-	sayDescription(game,room) {
+
+	sayDescription(game, room) {
 		let id = Tools.toId(game);
 		for (let fileID in this.games) {
 			let game = this.games[fileID];
@@ -216,7 +216,7 @@ class Plugin {
 		if (this.games[id].minigame) return;
 		room.say(this.games[id].description);
 	}
-	
+
 	createMiniGame(game, room) {
 		this.loadGames();
 		let id = Tools.toId(game);
@@ -239,8 +239,7 @@ class Plugin {
 		if (room.game) {
 			if (room.game.minigame) {
 				return room.say("A minigame is in progress!");
-			}
-			else {
+			} else {
 				return room.say("A game of " + room.game.name + " is already in progress.");
 			}
 		}
@@ -381,19 +380,19 @@ let commands = {
 		if (!room.game) return;
 		if (typeof room.game.hit === 'function') room.game.hit(target, user);
 	},
-	
+
 	destroy: function (target, room, user) {
 		for (room in Rooms.rooms) {
 			let realRoom = Rooms.rooms[room];
-			if (realRoom.game && typeof realRoom.game.destroy === 'function') realRoom.game.destroy(user,target);
+			if (realRoom.game && typeof realRoom.game.destroy === 'function') realRoom.game.destroy(user, target);
 		}
 	},
-	
+
 	attack: function (target, room, user) {
 		if (!room.game) return;
 		if (typeof room.game.attack === 'function') room.game.attack(target, user);
 	},
-	
+
 	nominate: 'nom',
 	nom: function (target, room, user) {
 		if (!room.game) return;
@@ -415,26 +414,26 @@ let commands = {
 		if (!room.game || !user.hasRank(room, '+')) return;
 		if (typeof room.game.cap === 'function') room.game.cap(target);
 	},
-	
-	order: function(target, room, user) {
+
+	order: function (target, room, user) {
 		if (!user.hasRank(room, '+')) return;
 		Games.createMiniGame("order", room);
 	},
-	
-	il: function(target,room,user) {
+
+	il: function (target, room, user) {
 		if (!user.hasRank(room, '+')) return;
 		Games.createMiniGame("il", room);
 	},
-	
-	mashup: function(target,room,user) {
+
+	mashup: function (target, room, user) {
 		if (!user.hasRank(room, '+') || room.game) return;
 		Games.createMiniGame("mashup", room);
-	}
-	
-	forcejoin: function(target, room, user) {
+	},
+
+	forcejoin: function (target, room, user) {
 		if (!user.isDeveoper()) return;
-		room.say(Config.commandCharacter  + "join");
-	}
+		room.say(Config.commandCharacter + "join");
+	},
 };
 Games.Minigame = Minigame;
 Games.Game = Game;
