@@ -6,8 +6,6 @@ const id = Tools.toId(name);
 const data = {};
 const monForms = {};
 
-const generations = [151, 251, 386, 493, 649, 721];
-
 function shuffle(array) {
 	let currentIndex = array.length, temporaryValue, randomIndex;
 	while (0 !== currentIndex) {
@@ -18,16 +16,6 @@ function shuffle(array) {
 		array[randomIndex] = temporaryValue;
 	}
 	return array;
-}
-
-function generation(dexNum) {
-	let i, len = generations.length;
-	for (i = 0; i < len; i++) {
-		if (generations[i] >= dexNum) {
-			break;
-		}
-	}
-	return i + 1;
 }
 
 for (let i in Tools.data.pokedex) {
@@ -60,7 +48,7 @@ for (let i in Tools.data.pokedex) {
 	if (i in monForms) {
 		data[species]["Pokemon Moves"].push.apply(data[species]["Pokemon Moves"], data[monForms[i]]["Pokemon Moves"]);
 	}
-	data[species]["generation"] = [generation(mon.num)];
+	data[species]["generation"] = [Tools.generation(mon.num)];
 	if (Tools.data.battle[i]) {
 		data[species]["tier"] = [Tools.data.battle[i].tier];
 	}
@@ -96,9 +84,7 @@ class Excluded extends Games.Game {
 		while (!valid) {
 			let keys = Object.keys(data);
 			let mon = keys[Math.floor(Math.random() * keys.length)];
-			console.log(mon);
 			this.category = Object.keys(data[mon])[Math.floor(Math.random() * Object.keys(data[mon]).length)];
-			console.log(this.category);
 			this.param = data[mon][this.category][Math.floor(Math.random() * data[mon][this.category].length)];
 			if (this.category === "Pokemon Moves") {
 				valid = this.isValid(this.param);
@@ -106,7 +92,6 @@ class Excluded extends Games.Game {
 				valid = true;
 			}
 		}
-		console.log(this.param);
 		this.timeout = setTimeout(() => this.nextRound(), 5 * 1000);
 	}
 

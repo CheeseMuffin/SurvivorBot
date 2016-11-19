@@ -53,6 +53,10 @@ class Game {
 
 	start() {
 		if (this.started) return;
+		if (this.playerCount < 2) {
+			this.say("The game needs at least two players to start!");
+			return;
+		}
 		this.started = true;
 		if (typeof this.onStart === 'function') this.onStart();
 	}
@@ -100,6 +104,15 @@ class Game {
 		if (typeof this.onNextRound === 'function') this.onNextRound();
 	}
 
+	numPlayers() {
+		let numPlayers = 0;
+		for (let userID in this.players) {
+			let player = this.players[userID];
+			if (!player.eliminated) numPlayers++;
+		}
+		return numPlayers;
+	}
+
 	addPlayer(user) {
 		if (user.id in this.players) return;
 		let player = new Player(user);
@@ -111,6 +124,13 @@ class Game {
 		return player;
 	}
 
+	remainingPlayer() {
+		for (let userID in this.players) {
+			let player = this.players[userID];
+			if (!player.eliminated) return player;
+		}
+		return null;
+	}
 	removePlayer(user) {
 		if (!(user.id in this.players) || this.players[user.id].eliminated) return;
 		if (this.started) {
@@ -431,8 +451,13 @@ let commands = {
 	},
 
 	forcejoin: function (target, room, user) {
-		if (!user.isDeveoper()) return;
+		if (!user.isDeveloper()) return;
 		room.say(Config.commandCharacter + "join");
+	},
+
+	forceguess: function (target, room, user) {
+		if (!user.isDeveloper()) return;
+		room.say(Config.commandCharacter + "guess " + target);
 	},
 };
 Games.Minigame = Minigame;

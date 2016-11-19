@@ -3,7 +3,6 @@
 const name = "Pancham's Pairs";
 const description = "Players try to pair the given mons according to ``/dexsearch`` parameters! Valid parameters include tier, generation, color, type, and ability. **Command:** ``" + Config.commandCharacter + "pair mon1, mon2, param``";
 const id = Tools.toId(name);
-const generations = [151, 251, 386, 493, 649, 721];
 const data = {};
 
 function shuffle(array) {
@@ -18,15 +17,6 @@ function shuffle(array) {
 	return array;
 }
 
-function generation(dexNum) {
-	let i, len = generations.length;
-	for (i = 0; i < len; i++) {
-		if (generations[i] >= dexNum) {
-			break;
-		}
-	}
-	return i + 1;
-}
 for (let i in Tools.data.pokedex) {
 	let mon = Tools.data.pokedex[i];
 	if (mon.num < 1) continue;
@@ -38,7 +28,7 @@ for (let i in Tools.data.pokedex) {
 	data[species]["ability"] = Object.keys(mon.abilities).map(function (key) {
 		return mon.abilities[key];
 	});
-	data[species]["generation"] = [generation(mon.num)];
+	data[species]["generation"] = [Tools.generation(mon.num)];
 	if (Tools.data.battle[i]) {
 		data[species]["tier"] = [Tools.data.battle[i].tier];
 	}

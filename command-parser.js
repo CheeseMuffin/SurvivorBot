@@ -74,7 +74,6 @@ class CommandParser {
 			type = typeof Commands[command];
 		}
 		if (type !== 'function') return;
-
 		new Context(target, room, user, command, time).run();
 	}
 }

@@ -81,6 +81,17 @@ class Tools {
 		}
 		return array;
 	}
+
+	generation(num) {
+		let generations = [151, 251, 386, 493, 649, 721, 802];
+		let i, len = generations.length;
+		for (i = 0; i < len; i++) {
+			if (generations[i] >= num) {
+				break;
+			}
+		}
+		return i + 1;
+	}
 }
 
 let tools = new Tools();

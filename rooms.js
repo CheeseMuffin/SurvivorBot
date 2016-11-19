@@ -96,7 +96,7 @@ class Room {
 			if (!user) return;
 			rank = splitMessage[1].charAt(0);
 			if (user.rooms.get(this) !== rank) user.rooms.set(this, rank);
-			if (user.id === Users.self.id) return;
+			//if (user.id === Users.self.id) return;
 			CommandParser.parse(splitMessage.slice(2).join('|'), this, user, splitMessage[0] * 1000);
 			break;
 

@@ -6,7 +6,7 @@ function replaceAt(str, index, character) {
 
 const name = "Hangman Bomb";
 const id = Tools.toId(name);
-const description = "A variation of hangman in which each player starts with 5 lives - if you guess the answer, you gain a life, but with every wrong guess you lose a life. Last survivor wins! **Command:** ``" + Config.commandCharacter + "g [answer]``";
+const description = "A variation of hangman in which each player starts with 5 lives - if you guess the answer, you gain a life, but with every wrong guess or missed round you lose a life. Last survivor wins! **Command:** ``" + Config.commandCharacter + "g [answer]``";
 const data = {
 	"Pokemon Moves" : [],
 	"Pokemon Items" : [],
@@ -48,8 +48,7 @@ class HangmanBomb extends Games.Game {
 		this.answer = null;
 		this.points = new Map();
 		this.categories = Object.keys(data);
-		this.guessedLets = [];
-		this.guessedWords = [];
+		this.guessed = [];
 		this.category = null;
 		this.curGuesses = new Map();
 		this.letterRound = 0;
@@ -57,10 +56,6 @@ class HangmanBomb extends Games.Game {
 	}
 
 	onStart() {
-		if (this.playerCount < 2) {
-			this.room.say("The game needs at least two players to start!");
-			return;
-		}
 		this.nextRound();
 	}
 
@@ -72,76 +67,83 @@ class HangmanBomb extends Games.Game {
 		let player = this.players[user.id];
 		this.points.delete(player);
 		this.curGuesses.delete(player);
-		delete this.players[user.id];
-		if (this.playerCount === 1 && this.started) {
-			this.room.say("The correct answer was: __" + this.answer + "__");
-			this.room.say("**Congratulations**! " + this.players[Object.keys(this.players)[0]].name + " has won the game!");
+		if (this.numPlayers() === 1 && this.started) {
+			if (this.answer) {
+				this.say("The correct answer was: __" + this.answer + "__");
+			}
+			let winPlayer = this.remainingPlayer();
+			this.say("**Winner:** " + winPlayer.name);
 			this.end();
 			return;
 		}
 	}
 
+	updatePoints(countNon) {
+		for (let userID in this.players) {
+			let player = this.players[userID];
+			if (player.eliminated) continue;
+			let guess = this.curGuesses.get(player);
+			if (!guess && !countNon) continue;
+			let points = this.points.get(player);
+			if (!guess || guess.length > 1 || (guess.length === 1 && this.answer.split(guess).length === 1)) {
+				points--;
+				this.points.set(player, points);
+				if (points === 0) {
+					player.say("You have lost all of your lives!");
+					this.removePlayer(player);
+				}
+			}
+		}
+	}
 	nextLetter() {
 		let realAnswer = this.answer;
 		this.answer = this.answer.toLowerCase();
 		let str = Array(this.answer.length + 1).join("_");
 		let badstr = [];
 		for (let i = 0, len = this.answer.length; i < len; i++) {
-			if (this.answer[i] === ' ' || this.answer[i] === '-' || this.answer[i] === '\'') {
+			if (this.answer[i] === ' ' || this.answer[i] === '\'') {
 				str = replaceAt(str, i, '/');
+			} else if (this.answer[i] === '-') {
+				str = replaceAt(str, i, '-');
 			}
 		}
-		for (let letter in this.guessedLets) {
+		for (let j = 0, guessLen = this.guessed.length; j < guessLen; j++) {
+			let guess = this.guessed[j];
+			if (guess.length > 1) {
+				badstr.push(guess);
+				continue;
+			}
 			let found = false;
 			for (let i = 0, len = this.answer.length; i < len; i++) {
-				if (this.answer[i] === this.guessedLets[letter]) {
+				if (this.answer[i] === guess) {
 					str = replaceAt(str, i, realAnswer.charAt(i));
 					found = true;
 				}
 			}
 			if (!found) {
-				badstr.push(this.guessedLets[letter]);
+				badstr.push(guess);
 			}
-		}
-		for (let i in this.guessedWords) {
-			badstr.push(this.guessedWords[i]);
 		}
 		if (this.letterRound !== 0) {
-			for (let userID in this.players) {
-				if (!userID) {
-					continue;
-				}
-				let player = this.players[userID];
-				let guess = this.curGuesses.get(player);
-				let points = this.points.get(player);
-
-				if (guess !== "" && (!guess || guess.length > 1 || (guess.length === 1 && this.answer.split(guess).length === 1))) {
-					points--;
-					this.points.set(player, points);
-					if (points === 0) {
-						this.playerCount--;
-						player.say("You have lost all of your lives!");
-						delete this.players[userID];
-					}
-				}
-				this.curGuesses.delete(player);
-			}
+			this.updatePoints(true);
 		} else {
 			this.letterRound++;
 		}
-		if (this.playerCount === 0) {
-			this.room.say("The correct answer was: __" + realAnswer + "__");
-			this.room.say("No winners this game! Better luck next time!");
+		let numPlayers = this.numPlayers();
+		if (numPlayers === 0) {
+			this.say("The correct answer was: __" + realAnswer + "__");
+			this.say("No winners this game! Better luck next time!");
+			this.end();
+			return;
+		} else if (numPlayers === 1) {
+			let winPlayer = this.remainingPlayer();
+			this.say("The correct answer was: __" + realAnswer + "__");
+			this.say("**Winner:** " + winPlayer.name);
 			this.end();
 			return;
 		}
-		if (this.playerCount === 1) {
-			this.room.say("The correct answer was: __" + realAnswer + "__");
-			this.room.say("**Congratulations**! " + this.players[Object.keys(this.players)[0]].name + " has won the game!");
-			this.end();
-			return;
-		}
-		this.room.say(str.split("").join(" ") + " | **" + this.category + "** | " + badstr.join(", "));
+		this.say(str.split("").join(" ") + " | **" + this.category + "** | " + badstr.join(", "));
+		this.curGuesses.clear();
 		this.answer = realAnswer;
 		this.timeout = setTimeout(() => this.nextLetter(), 10 * 1000);
 	}
@@ -149,40 +151,35 @@ class HangmanBomb extends Games.Game {
 		this.letterRound = 0;
 		let players = [];
 		for (let userID in this.players) {
-			players.push(this.players[userID].name + ": (" + this.points.get(this.players[userID]) + "♥)");
+			let player = this.players[userID];
+			if (player.eliminated) continue;
+			players.push(player.name + ": (" + this.points.get(player) + "♥)");
 		}
+		this.guessed = [];
 		this.curGuesses.clear();
-		this.guessedLets = [];
-		this.guessedWords = [];
 		this.category = this.categories[Math.floor(Math.random() * this.categories.length)];
 		this.answer = data[this.category][Math.floor(Math.random() * data[this.category].length)];
-		this.room.say("**Players (" + this.playerCount + ")**: " + players.join(", "));
+		this.say("**Players (" + this.numPlayers() + ")**: " + players.join(", "));
 		this.nextLetter();
 	}
 	guess(guess, user) {
 		let userID = user.id;
 		let player = this.players[userID];
-		if (!player || this.curGuesses.get(player)) {
+		if (!player || player.eliminated || this.curGuesses.get(player)) {
 			return;
 		}
 		guess = Tools.toId(guess);
-		if (guess.length === 1) {
-			if (this.guessedLets.indexOf(guess) === -1) {
-				this.guessedLets.push(guess);
-				this.curGuesses.set(player, guess);
-			}
-		} else {
-			if (this.guessedWords.indexOf(guess) === -1) {
-				this.guessedWords.push(guess);
-				this.curGuesses.set(player, guess);
-			}
+		if (this.guessed.indexOf(guess) === -1) {
+			this.guessed.push(guess);
+			this.curGuesses.set(player, guess);
 		}
 		if (guess === Tools.toId(this.answer)) {
+			this.updatePoints(false);
 			clearTimeout(this.timeout);
 			let points = this.points.get(player);
-			points += 1;
+			points += 2;
 			this.points.set(player, points);
-			this.room.say("**Correct**! " + user.name + " guessed the correct answer and gained one life! (Answer: __" + this.answer + "__)");
+			this.say("**Correct**! " + user.name + " guessed the correct answer and gained one life! (Answer: __" + this.answer + "__)");
 			this.answer = null;
 			this.timeout = setTimeout(() => this.nextRound(), 5 * 1000);
 		}
