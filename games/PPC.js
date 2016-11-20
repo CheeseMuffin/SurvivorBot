@@ -30,7 +30,7 @@ for (let i in Tools.data.pokedex) {
 	data[mon1.species] = [];
 	for (let j in Tools.data.pokedex) {
 		let mon2 = Tools.data.pokedex[j];
-		if (!mon2.species || mon2.num < 0) continue;
+		if (!mon2.species || mon2.num < 1) continue;
 		if (i !== j && isPort(i, j)) {
 			data[mon1.species].push(mon2.species);
 		}
@@ -74,7 +74,7 @@ class PPC extends Games.Game {
 		while (found) {
 			this.curMon = Object.keys(data)[Math.floor(Math.random() * Object.keys(data).length)];
 			console.log(this.curMon);
-			if (this.valid()) found = true;
+			if (this.valid()) found = false;
 		}
 	}
 

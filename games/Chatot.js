@@ -69,6 +69,7 @@ class Chatot extends Games.Game {
 	}
 
 	sit(target, user) {
+		if (!this.started) return;
 		let player = this.players[user.id];
 		if (!player || this.sittings.get(player)) return;
 		let num = Math.floor(target);

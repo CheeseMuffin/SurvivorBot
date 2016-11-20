@@ -45,3 +45,4 @@ exports.id = id;
 exports.description = description;
 exports.game = Count;
 exports.aliases = [];
+exports.minigame = true;

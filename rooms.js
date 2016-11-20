@@ -101,9 +101,13 @@ class Room {
 			break;
 
 		case 'html':
-			if (this.game) {
+			if (this.game && typeof this.game.handlehtml === 'function') {
 				this.game.handlehtml(splitMessage);
 			}
+			break;
+
+		case 'tournament':
+			Tournaments.handleMessage(splitMessage, this);
 			break;
 		}
 	}

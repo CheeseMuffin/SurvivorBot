@@ -362,7 +362,7 @@ let commands = {
 			if (!user.hasRank(room, '+') || Tools.toId(target) !== "start") {
 				return;
 			}
-			Games.createGame("count", room);
+			Games.createMiniGame("count", room);
 		} else if (typeof room.game.count === 'function') {
 			room.game.count(target, user);
 		}
@@ -389,11 +389,7 @@ let commands = {
 
 	games: function (target, room, user) {
 		if (!user.isDeveloper() && !user.hasRank(room, '+')) return;
-		let str = [];
-		for (let i in Games.games) {
-			str.push(Games.games[i].name);
-		}
-		room.say("These are the games I currently have: " + str.join(", "));
+		this.say("List of games: http://hastebin.com/moruzomaye.md");
 	},
 
 	hit: function (target, room, user) {
@@ -459,6 +455,23 @@ let commands = {
 		if (!user.isDeveloper()) return;
 		room.say(Config.commandCharacter + "guess " + target);
 	},
+
+	dobattle: function (target, room, user) {
+		console.log("ayy lmao");
+		if (!user.isDeveloper()) return;
+		Client.send('|/utm null');
+	},
+
+	jointourney: function (target, room, user) {
+		console.log("sup");
+		if (!user.isDeveloper()) return;
+		room.say("/tour join");
+	},
+	
+	git: function (target, room, user) {
+		if (!user.hasRank(room, '+')) return;
+		this.say("Git source code: www.github.com/CheeseMuffin/BotStuff");
+	}
 };
 Games.Minigame = Minigame;
 Games.Game = Game;
