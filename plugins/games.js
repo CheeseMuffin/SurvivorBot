@@ -49,40 +49,37 @@ class Game {
 		if (this.description) this.say("Description: " + this.description);
 		if (typeof this.onSignups === 'function') this.onSignups();
 		if (this.freeJoin) this.started = true;
-		//this.addBits(100,"cheesemuffin");
+		
 	}
-
-	addBits(numBits,username) {
-		fs.readFile('bits.txt',function (err, data) {
+	
+	winUser(numBits,player) {
+		player.say("You were awarded " + numBits + " bits for winning the game! You can use the command ``" + Config.commandCharacter + "bits`` to check your bits.");
+		Games.addBits(numBits,player.name);
+	}
+	addChieve(chieveName,username) {
+		fs.readFile('chieves.txt', function (err,data) {
 			if (err) {
-				return console.error(err);
+				console.error(err);
 			}
 			data = JSON.parse(data);
-			let found = false;
-			for (let name in data) {
-				if (Tools.toId(name) === Tools.toId(username)) {
-					let curBits = data[name];
-					curBits += numBits;
-					data[name] = curBits;
-					found = true;
+			let stuff = [];
+			for (let key in data) {
+				if (Tools.toId(key) === Tools.toId(username)) {
+					stuff = data[key];
+					if (stuff.indexOf(chieveName) !== -1) return;
+					stuff.add(chieveName);
+					data[key] = stuff;
 					break;
 				}
 			}
-			if (!found) {
-				data[username] = numBits;
+			if (stuff.length === 0) {
+
+				data[username] = [chieveName];
 			}
-			fs.writeFile('bits.txt', JSON.stringify(data));
+			Users.get(username).say("You got the chieve " + chieveName + " and received 500 bits!");
+			fs.writeFile('chieves.txt', JSON.stringify(data));
+			Games.addBits(500, username);
 		});
-	}
-	
-	addChieves(chieveName,username) {
-		fs.readFile('chieves.txt', function (err,data) {
-			
-		});
-	}
-	winUser(numBits,player) {
-		player.say("You were awarded " + numBits + " bits for winning the game! You can use the command ``" + Config.commandCharacter + "bits`` to check your bits.");
-		this.addBits(numBits,player.name);
 	}
 	start() {
 		if (this.started) return;
@@ -312,69 +309,27 @@ class Plugin {
 		room.game.signups();
 	}
 	
-	getBits(target,room,user) {
-		
-		
-		fs.readFile('bits.txt',function (err,data) {
-			
+	addBits(numBits,username) {
+		fs.readFile('bits.txt',function (err, data) {
 			if (err) {
 				return console.error(err);
 			}
-			let userID,username;
-			if (target) {
-				userID = Users.get(Tools.toId(target)).name;
-			}
-			else {
-				userID = user.name;
-			}	
-			console.log(username + " " + userID);
-			console.log("ayy lmao " + username + "!");
 			data = JSON.parse(data);
-			let curBits = 0;
+			let found = false;
 			for (let name in data) {
-				if (Tools.toId(name) === Tools.toId(userID)) {
-					curBits = data[name];
+				if (Tools.toId(name) === Tools.toId(username)) {
+					let curBits = data[name];
+					curBits += numBits;
+					data[name] = curBits;
+					found = true;
+					break;
 				}
 			}
-			console.log(curBits + "????");
-			console.log("curbits is " + curBits);
-			if (room.name === user.name) {
-				if (userID === user.name) {
-					if (curBits === 0) {
-						user.say("You currently don't have any bits!");
-					}
-					else {
-						user.say("You currently have **" + curBits + "** bits!");
-					}
-				}
-				else {
-					if (curBits === 0) {
-						user.say("The user " + userID + " does not have any bits!");
-					}
-					else {
-						user.say("The user " + userID + " currently has **" + curBits + "** bits!");
-					}
-				}
+			if (!found) {
+				data[username] = numBits;
 			}
-			else {
-				if (!user.hasRank(room, '+')) return;
-				if (userID === user.name) {
-					if (curBits === 0) {
-						room.say("You currently don't have any bits!");
-					}
-					else {
-						room.say("You currently have **" + curBits + "** bits!");
-					}
-				}	
-				else {
-					if (curBits === 0) {
-						room.say("The user " + userID + " does not have any bits!");
-					}
-					else {
-						room.say("The user " + userID + " currently has **" + curBits + "** bits!");
-					}
-				}
-			}
+			fs.writeFile('bits.txt', JSON.stringify(data));
+			
 		});
 	}
 }
@@ -556,13 +511,11 @@ let commands = {
 	},
 
 	dobattle: function (target, room, user) {
-		console.log("ayy lmao");
 		if (!user.isDeveloper()) return;
 		Client.send('|/utm null');
 	},
 
 	jointourney: function (target, room, user) {
-		console.log("sup");
 		if (!user.isDeveloper()) return;
 		room.say("/tour join");
 	},
@@ -573,7 +526,51 @@ let commands = {
 	},
 	
 	bits: function (target, room, user) {
-		Games.getBits(target,room,user);
+		if (!user.hasRank(room, '+') && room.name !== user.name) return;
+		fs.readFile('bits.txt',function (err,data) {
+			
+			if (err) {
+				return console.error(err);
+			}
+			let userID,username;
+			if (target) {
+				userID = Users.get(Tools.toId(target)).name;
+			}
+			else {
+				userID = user.name;
+			}	
+			data = JSON.parse(data);
+			let curBits = 0;
+			var items = Object.keys(data).map(function(key) {
+				return [key, data[key]];
+			});
+			items.sort(function(first, second) {
+				return second[1] - first[1];
+			});
+			let i;
+			for (i = 0; i < items.length; i++) {
+				if (Tools.toId(userID) === Tools.toId(items[i][0])) {
+					curBits = items[i][1];
+					break;
+				}
+			}
+				if (userID === user.name) {
+					if (curBits === 0) {
+						room.say("You currently don't have any bits!");
+					}
+					else {
+						room.say("You are #" + (i + 1) + " on the leaderboard with " + curBits + " bits!");
+					}
+				}
+				else {
+					if (curBits === 0) {
+						room.say("**" + userID + "** does not have any bits!");
+					}
+					else {
+						room.say("**" + userID + "** is currently #" + (i+1) + " on the leaderboard with " + curBits + " bits!");
+					}
+				}
+		});
 	},
 	
 	topbits: 'top',
@@ -608,6 +605,54 @@ let commands = {
 				strs.push(i+1 + Tools.getSuffix(i+1) + ": __" + items[i][0] + "__(" + items[i][1] + ")");
 			}
 			room.say("``Top " + realNum + " of " + items.length + "``: " + strs.join(", "));
+		});
+	},
+	
+	chieve: function (target, room, user) {
+		if (!user.hasRank(room, '+') && room.name !== user.name) return;
+		fs.readFile("chieveList.txt", function (err,data) {
+			if (err) {
+				console.error(err);
+			}
+			data = JSON.parse(data);
+			let found = false;
+			for (let name in data) {
+				if (Tools.toId(name) === Tools.toId(target)) {
+					room.say(name + ": " + data[name]);
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				room.say("Please enter a valid achievement.");
+			}
+		});
+	},
+	
+	chieves: function (target, room, user) {
+		if (!user.hasRank(room, '+') && room.name !== user.name) return;
+		fs.readFile("chieves.txt", function (err,data) {
+			let userID;
+			if (target) {
+				userID = target;
+			}
+			else {
+				userID = user.name;
+			}
+			let found = false;
+			data = JSON.parse(data);
+			console.log(data);
+			console.log(userID);
+			for (let key in data) {
+				if (Tools.toId(userID) === Tools.toId(key)) {
+					room.say((userID === user.name ? "Your " : userID + "'s ") + "achievements: " + data[key].join(", "));
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				room.say(userID + " hasn't unlocked any achievements.");
+			}
 		});
 	},
 };
