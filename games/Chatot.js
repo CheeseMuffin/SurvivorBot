@@ -47,6 +47,7 @@ class Chatot extends Games.Game {
 		if (this.playerCount === 1) {
 			let player = this.players[Object.keys(this.players)[0]];
 			this.room.say("**Winner**: " + player.name);
+			this.winUser(500,player);
 			this.end();
 			return;
 		} else if (this.playerCount === 0) {

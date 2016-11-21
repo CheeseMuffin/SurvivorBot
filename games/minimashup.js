@@ -82,6 +82,7 @@ class Mashup extends Games.Minigame {
 		if (!this.answers || !this.correct(target)) return;
 		clearTimeout(this.timeout);
 		this.say("Correct! " + user.name + " has guessed the answer! (Answer: __" + this.answers.join(" and ") + "__)");
+		this.winUser(25,player);
 		this.end();
 		return;
 	}

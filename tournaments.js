@@ -23,8 +23,8 @@ class Tournament {
 			if (updateMes.challenges) {
 				this.curChallenges = updateMes.challenges;
 			}
-			if (updateMes.challengedBy) {
-				this.challengedBys = updateMes.challengedBy;
+			if (updateMes.challengeBys) {
+				this.challengedBys = updateMes.challengeBys;
 			}
 			if (updateMes.challenged) {
 				let name = updateMes.challenged;
@@ -35,7 +35,7 @@ class Tournament {
 			break;
 		case 'start':
 			if (this.curChallenges) {
-				this.say("/tour challenge " + this.curChallenges[0]);
+				this.say("/tour challenge " + this.challengedBys[0]);
 			}
 		}
 	}

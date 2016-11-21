@@ -81,6 +81,7 @@ class PPC extends Games.Game {
 	onNextRound() {
 		if (this.playerCount === 1) {
 			this.say("**Winner:** " + this.players[Object.keys(this.players)[0]].name);
+			this.winUser(500, this.players[Object.keys(this.players)[0]]);
 			this.end();
 			return;
 		} else if (this.playerCount === 0) {

@@ -49,7 +49,7 @@ class Anagrams extends Games.Game {
 		this.answer = null;
 		this.points = new Map();
 		this.categories = Object.keys(data);
-		this.maxPoints = 100;
+		this.maxPoints = 5;
 	}
 
 	onSignups() {
@@ -83,6 +83,7 @@ class Anagrams extends Games.Game {
 		this.points.set(player, points);
 		if (points >= this.maxPoints) {
 			this.room.say("Correct! " + user.name + " wins the game! (Answer: __" + this.answer + "__)");
+			this.winUser(500,player);
 			this.end();
 			return;
 		}

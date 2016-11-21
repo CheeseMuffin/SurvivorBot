@@ -154,6 +154,7 @@ class Excluded extends Games.Game {
 		if (Tools.toId(target) === Tools.toId(this.param)) {
 			this.say(player.name + " has guessed the correct parameter (__" + this.param + "__) and won the game!");
 			clearTimeout(this.timeout);
+			this.winUser(500,player);
 			this.timeout = null;
 			this.end();
 			return;

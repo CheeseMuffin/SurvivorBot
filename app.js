@@ -58,6 +58,8 @@ global.Client = require('./client.js');
 
 global.Tournaments = require('./tournaments.js');
 
+global.Battles = require('./Battles.js');
+
 if (require.main === module) {
 	Client.connect();
 }

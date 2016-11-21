@@ -29,7 +29,10 @@ class Dexterity extends Games.Game {
 	}
 
 	onStart() {
-		this.nextRound();
+		this.say("Sorry, but this game is not yet ready.");
+		this.end();
+		return;
+		//this.nextRound();
 	}
 
 	onNextRound() {
@@ -176,6 +179,7 @@ class Dexterity extends Games.Game {
 			this.handlePick(message);
 		}
 	}
+	
 	destroy(user, target) {
 		if (!this.canAttack) return;
 		let curPlayer = this.players[user.id];

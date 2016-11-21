@@ -34,5 +34,7 @@ node_modules
 
 # Cassius files
 config.js
+bits.txt
+chieves.txt
 .eslintcache
 plugins/private.js

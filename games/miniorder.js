@@ -85,6 +85,7 @@ class Order extends Games.Minigame {
 		if (!this.answer || guess !== Tools.toId(this.answer)) return;
 		clearTimeout(this.timeout);
 		this.say("Correct! " + user.name + " has guessed the answer! (__" + this.answer + "__)");
+		this.winUser(25,player);
 		this.end();
 		return;
 	}

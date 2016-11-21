@@ -53,6 +53,7 @@ class Room {
 	say(message) {
 		if (!message) return;
 		if (message.charAt(0) !== '!') message = Tools.normalizeMessage(message);
+		//console.log("I'm saying " + message + " in room " + this.id + "!");
 		Client.send(this.clientId + '|' + message);
 		Client.send(this.clientId + '|' + '/asdf');
 	}
@@ -63,7 +64,7 @@ class Room {
 		Client.send(this.clientId + '|' + '/asdf');
 	}
 	parseMessage(messageType, splitMessage) {
-		let user, rank;
+		let user, rank,stuff;
 		switch (messageType) {
 		case 'J':
 		case 'j':
@@ -109,6 +110,31 @@ class Room {
 		case 'tournament':
 			Tournaments.handleMessage(splitMessage, this);
 			break;
+
+		case 'updatechallenges':
+			stuff = JSON.parse(splitMessage[0]);
+			console.log(stuff.challengesFrom);
+			let name = Object.keys(stuff.challengesFrom)[0];
+			let format = stuff.challengesFrom[name];
+			console.log(format + " " + name);
+			if (format === 'challengecup1v1') {
+				Users.add(name).say("/accept");
+			}
+			break;
+		
+		case 'request':
+			stuff = JSON.parse(splitMessage[0]);
+			Battles.handleRequest(stuff, this);
+			break;
+		
+		case 'turn':
+			console.log("hi");
+			stuff = JSON.parse(splitMessage[0]);
+			Battles.move(this,stuff);
+			break;
+		case 'switch':
+			stuff = splitMessage[0];
+			Battles.handleSwitch(this,stuff)
 		}
 	}
 }

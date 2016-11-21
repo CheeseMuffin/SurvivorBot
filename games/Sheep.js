@@ -75,7 +75,7 @@ class Sheep extends Games.Game {
 		} else {
 			this.guessed = true;
 			this.order = shuffle(Object.keys(this.players));
-			this.room.say("**Round " + this.round + "**!");
+			this.say("**Round " + this.round + "**!");
 			this.nextPlayer();
 		}
 	}

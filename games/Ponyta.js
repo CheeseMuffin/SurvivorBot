@@ -47,6 +47,7 @@ class Ponyta extends Games.Game {
 				let points = this.points.get(player) || 0;
 				this.points.set(player, points + guessNum / this.num);
 				player.say("You earned " + Math.floor(50 * guessNum / this.num) + " bits this round!");
+				this.addBits(Math.floor(50 * guessNum / this.num), player.name);
 			}
 		}
 		this.timeout = setTimeout(() => this.nextRound(), 5 * 1000);

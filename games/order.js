@@ -89,6 +89,7 @@ class Orders extends Games.Game {
 		this.points.set(player, points);
 		if (points >= this.maxPoints) {
 			this.room.say("Correct! " + user.name + " wins the game! (Answer: __" + this.answer + "__)");
+			this.winUser(500,player);
 			this.end();
 			return;
 		}
