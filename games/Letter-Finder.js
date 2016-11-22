@@ -50,15 +50,15 @@ class LetterFinder extends Games.Game {
 		this.categories = Object.keys(data);
 		this.maxPoints = 5;
 	}
-	
+
 	onSignups() {
 		this.timeout = setTimeout(() => this.nextRound(), 10 * 1000);
 	}
-	
+
 	isGood(cur) {
 		cur = Tools.toId(cur);
 		for (let i = 0; i < cur.length; i++) {
-			if (cur.substr(i,3) === this.curAnswer) {
+			if (cur.substr(i, 3) === this.curAnswer) {
 				return true;
 			}
 		}
@@ -73,7 +73,7 @@ class LetterFinder extends Games.Game {
 		this.category = this.categories[Math.floor(Math.random() * this.categories.length)];
 		let curThing = Tools.toId(data[this.category][Math.floor(Math.random() * data[this.category].length)]);
 		let curLetter = Math.floor(Math.random() * (curThing.length - 2));
-		this.curAnswer = curThing.substr(curLetter,3);
+		this.curAnswer = curThing.substr(curLetter, 3);
 		for (let i = 0; i < data[this.category].length; i++) {
 			let cur = data[this.category][i];
 			if (this.isGood(cur)) this.answers.push(cur);
@@ -103,7 +103,7 @@ class LetterFinder extends Games.Game {
 			if (this.round === this.maxPoints) {
 				this.addChieve("Letter Professional", user.name);
 			}
-			this.winUser(500,player);
+			this.winUser(500, player);
 			this.end();
 			return;
 		}

@@ -83,7 +83,7 @@ class Buneary extends Games.Game {
 				this.say("Noone earned any points this game");
 			} else {
 				this.say("The winner is **" + bestPlayer.name + "** with " + maxPoints + " points!");
-				this.winUser(500,bestPlayer);
+				this.winUser(500, bestPlayer);
 			}
 			this.end();
 			return;

@@ -77,7 +77,7 @@ class BerryTrivia extends Games.Game {
 			if (this.round === this.maxPoints) {
 				this.addChieve("Berry-Nerd", user.name);
 			}
-			this.winUser(500,player);
+			this.winUser(500, player);
 			this.end();
 			return;
 		}

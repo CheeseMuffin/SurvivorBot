@@ -64,7 +64,7 @@ class Room {
 		Client.send(this.clientId + '|' + '/asdf');
 	}
 	parseMessage(messageType, splitMessage) {
-		let user, rank,stuff;
+		let user, rank, stuff;
 		switch (messageType) {
 		case 'J':
 		case 'j':
@@ -121,20 +121,19 @@ class Room {
 				Users.add(name).say("/accept");
 			}
 			break;
-		
 		case 'request':
 			stuff = JSON.parse(splitMessage[0]);
 			Battles.handleRequest(stuff, this);
 			break;
-		
 		case 'turn':
 			console.log("hi");
 			stuff = JSON.parse(splitMessage[0]);
-			Battles.move(this,stuff);
+			Battles.move(this, stuff);
 			break;
 		case 'switch':
 			stuff = splitMessage[0];
-			Battles.handleSwitch(this,stuff)
+			Battles.handleSwitch(this, stuff);
+			break;
 		}
 	}
 }

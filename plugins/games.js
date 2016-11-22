@@ -49,15 +49,14 @@ class Game {
 		if (this.description) this.say("Description: " + this.description);
 		if (typeof this.onSignups === 'function') this.onSignups();
 		if (this.freeJoin) this.started = true;
-		
 	}
-	
-	winUser(numBits,player) {
+
+	winUser(numBits, player) {
 		player.say("You were awarded " + numBits + " bits for winning the game! You can use the command ``" + Config.commandCharacter + "bits`` to check your bits.");
-		Games.addBits(numBits,player.name);
+		Games.addBits(numBits, player.name);
 	}
-	addChieve(chieveName,username) {
-		fs.readFile('chieves.txt', function (err,data) {
+	addChieve(chieveName, username) {
+		fs.readFile('chieves.txt', function (err, data) {
 			if (err) {
 				console.error(err);
 			}
@@ -73,7 +72,6 @@ class Game {
 				}
 			}
 			if (stuff.length === 0) {
-
 				data[username] = [chieveName];
 			}
 			Users.get(username).say("You got the chieve " + chieveName + " and received 500 bits!");
@@ -308,9 +306,9 @@ class Plugin {
 		room.game = new this.games[id].game(room); // eslint-disable-line new-cap
 		room.game.signups();
 	}
-	
-	addBits(numBits,username) {
-		fs.readFile('bits.txt',function (err, data) {
+
+	addBits(numBits, username) {
+		fs.readFile('bits.txt', function (err, data) {
 			if (err) {
 				return console.error(err);
 			}
@@ -329,7 +327,6 @@ class Plugin {
 				data[username] = numBits;
 			}
 			fs.writeFile('bits.txt', JSON.stringify(data));
-			
 		});
 	}
 }
@@ -519,32 +516,30 @@ let commands = {
 		if (!user.isDeveloper()) return;
 		room.say("/tour join");
 	},
-	
+
 	git: function (target, room, user) {
 		if (!user.hasRank(room, '+')) return;
 		room.say("Git source code: www.github.com/CheeseMuffin/BotStuff");
 	},
-	
+
 	bits: function (target, room, user) {
 		if (!user.hasRank(room, '+') && room.name !== user.name) return;
-		fs.readFile('bits.txt',function (err,data) {
-			
+		fs.readFile('bits.txt', function (err, data) {
 			if (err) {
 				return console.error(err);
 			}
-			let userID,username;
+			let userID;
 			if (target) {
 				userID = Users.get(Tools.toId(target)).name;
-			}
-			else {
+			} else {
 				userID = user.name;
-			}	
+			}
 			data = JSON.parse(data);
 			let curBits = 0;
-			var items = Object.keys(data).map(function(key) {
+			let items = Object.keys(data).map(function (key) {
 				return [key, data[key]];
 			});
-			items.sort(function(first, second) {
+			items.sort(function (first, second) {
 				return second[1] - first[1];
 			});
 			let i;
@@ -554,38 +549,34 @@ let commands = {
 					break;
 				}
 			}
-				if (userID === user.name) {
-					if (curBits === 0) {
-						room.say("You currently don't have any bits!");
-					}
-					else {
-						room.say("You are #" + (i + 1) + " on the leaderboard with " + curBits + " bits!");
-					}
+			if (userID === user.name) {
+				if (curBits === 0) {
+					room.say("You currently don't have any bits!");
+				} else {
+					room.say("You are #" + (i + 1) + " on the leaderboard with " + curBits + " bits!");
 				}
-				else {
-					if (curBits === 0) {
-						room.say("**" + userID + "** does not have any bits!");
-					}
-					else {
-						room.say("**" + userID + "** is currently #" + (i+1) + " on the leaderboard with " + curBits + " bits!");
-					}
+			} else {
+				if (curBits === 0) {
+					room.say("**" + userID + "** does not have any bits!");
+				} else {
+					room.say("**" + userID + "** is currently #" + (i + 1) + " on the leaderboard with " + curBits + " bits!");
 				}
+			}
 		});
 	},
-	
+
 	topbits: 'top',
 	top: function (target, room, user) {
 		if (!user.hasRank(room, '+') && room.name !== user.name) return;
-		fs.readFile('bits.txt',function (err,data) {
-			
+		fs.readFile('bits.txt', function (err, data) {
 			if (err) {
 				console.error(err);
 			}
 			data = JSON.parse(data);
-			var items = Object.keys(data).map(function(key) {
+			let items = Object.keys(data).map(function (key) {
 				return [key, data[key]];
 			});
-			items.sort(function(first, second) {
+			items.sort(function (first, second) {
 				return second[1] - first[1];
 			});
 			let strs = [];
@@ -600,17 +591,16 @@ let commands = {
 			if (realNum > items.length) {
 				realNum = items.length;
 			}
-			
-			for (let i = Math.max(0,realNum-5); i < realNum; i++) {
-				strs.push(i+1 + Tools.getSuffix(i+1) + ": __" + items[i][0] + "__(" + items[i][1] + ")");
+			for (let i = Math.max(0, realNum - 5); i < realNum; i++) {
+				strs.push(i + 1 + Tools.getSuffix(i + 1) + ": __" + items[i][0] + "__(" + items[i][1] + ")");
 			}
 			room.say("``Top " + realNum + " of " + items.length + "``: " + strs.join(", "));
 		});
 	},
-	
+
 	chieve: function (target, room, user) {
 		if (!user.hasRank(room, '+') && room.name !== user.name) return;
-		fs.readFile("chieveList.txt", function (err,data) {
+		fs.readFile("chieveList.txt", function (err, data) {
 			if (err) {
 				console.error(err);
 			}
@@ -628,15 +618,14 @@ let commands = {
 			}
 		});
 	},
-	
+
 	chieves: function (target, room, user) {
 		if (!user.hasRank(room, '+') && room.name !== user.name) return;
-		fs.readFile("chieves.txt", function (err,data) {
+		fs.readFile("chieves.txt", function (err, data) {
 			let userID;
 			if (target) {
 				userID = target;
-			}
-			else {
+			} else {
 				userID = user.name;
 			}
 			let found = false;

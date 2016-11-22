@@ -63,7 +63,7 @@ class Chansey extends Games.Game {
 				}
 			}
 			this.room.say("The end! The winner was " + this.players[bestID].name + " with " + curMax + " points!");
-			this.winUser(500,this.players[bestID]);
+			this.winUser(500, this.players[bestID]);
 			this.end();
 			return;
 		}

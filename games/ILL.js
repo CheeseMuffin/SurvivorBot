@@ -108,7 +108,7 @@ class ILL extends Games.Game {
 		this.points.set(player, points);
 		if (points >= this.maxPoints) {
 			this.say("Correct! " + user.name + " wins the game! (Answer" + (this.answers.length > 1 ? "s" : "") + ": __" + this.answers.join(", ") + "__)");
-			this.winUser(500,player);
+			this.winUser(500, player);
 			this.end();
 			return;
 		}

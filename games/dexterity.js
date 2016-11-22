@@ -179,7 +179,7 @@ class Dexterity extends Games.Game {
 			this.handlePick(message);
 		}
 	}
-	
+
 	destroy(user, target) {
 		if (!this.canAttack) return;
 		let curPlayer = this.players[user.id];

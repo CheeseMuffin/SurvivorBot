@@ -94,21 +94,18 @@ class Tools {
 		}
 		return i + 1;
 	}
-	
+
 	effectiveness(move, mon) {
 		move = this.toId(move);
 		mon = this.toId(mon);
 		let moveType;
-		if (move.substr(0,12) === 'hiddenpower') {
-			moveType = move.substr(12,move.length-14);
-		}
-		else {
+		if (move.substr(0, 12) === 'hiddenpower') {
+			moveType = move.substr(12, move.length - 14);
+		} else {
 			let realMove = this.data.moves[move];
 			moveType = this.toId(realMove.type);
 		}
-		
 		let realMon = this.data.pokedex[mon];
-		
 		//console.log(moveType);
 		let curEffect = 1;
 		for (let i = 0; i < realMon.types.length; i++) {
@@ -117,20 +114,18 @@ class Tools {
 		}
 		return curEffect;
 	}
-	
+
 	getSuffix(num) {
-		num = num%100;
-		if (num >= 10 && num <= 19) return "th";
- 		else if (num%10 === 1) {
+		num = num % 100;
+		if (num >= 10 && num <= 19) {
+			return "th";
+		} else if (num % 10 === 1) {
 			return "st";
-		}
-		else if (num%10 === 2) {
+		} else if (num % 10 === 2) {
 			return "nd";
-		}
-		else if (num%10 === 3) {
+		} else if (num % 10 === 3) {
 			return "rd";
-		}
-		else {
+		} else {
 			return "th";
 		}
 	}

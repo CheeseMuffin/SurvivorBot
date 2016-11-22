@@ -73,7 +73,7 @@ class HangmanBomb extends Games.Game {
 			}
 			let winPlayer = this.remainingPlayer();
 			this.say("**Winner:** " + winPlayer.name);
-			this.winUser(500,winPlayer);
+			this.winUser(500, winPlayer);
 			this.end();
 			return;
 		}
@@ -140,7 +140,7 @@ class HangmanBomb extends Games.Game {
 			let winPlayer = this.remainingPlayer();
 			this.say("The correct answer was: __" + realAnswer + "__");
 			this.say("**Winner:** " + winPlayer.name);
-			this.winUser(500,winPlayer);
+			this.winUser(500, winPlayer);
 			this.end();
 			return;
 		}
