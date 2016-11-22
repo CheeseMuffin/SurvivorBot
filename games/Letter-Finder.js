@@ -101,7 +101,7 @@ class LetterFinder extends Games.Game {
 		if (points >= this.maxPoints) {
 			this.say("Correct! " + user.name + " wins the game! (Answer" + (this.answers.length > 1 ? "s" : "") + ": __" + this.answers.join(", ") + "__)");
 			if (this.round === this.maxPoints) {
-				this.addChieve("Letter Professional", user.name);
+				Games.addChieve("Letter Professional", user.name);
 			}
 			this.winUser(500, player);
 			this.end();

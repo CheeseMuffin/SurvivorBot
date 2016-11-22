@@ -89,6 +89,9 @@ class Orders extends Games.Game {
 		this.points.set(player, points);
 		if (points >= this.maxPoints) {
 			this.room.say("Correct! " + user.name + " wins the game! (Answer: __" + this.answer + "__)");
+			if (this.round === this.maxPoints) {
+				Games.addChieve("In Order", user.name);
+			}
 			this.winUser(500, player);
 			this.end();
 			return;

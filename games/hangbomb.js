@@ -182,6 +182,9 @@ class HangmanBomb extends Games.Game {
 			points += 2;
 			this.points.set(player, points);
 			this.say("**Correct**! " + user.name + " guessed the correct answer and gained one life! (Answer: __" + this.answer + "__)");
+			if (points === 10) {
+				Games.addChieve("Bombs Away", user.name);
+			}
 			this.answer = null;
 			this.timeout = setTimeout(() => this.nextRound(), 5 * 1000);
 		}

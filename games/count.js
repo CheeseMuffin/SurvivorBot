@@ -24,17 +24,20 @@ class Count extends Games.Minigame {
 			points++;
 			this.points.set(player, points);
 			this.curCount++;
+			if (this.curCount === 101) {
+				Games.addChieve("Count Dracula", player.name);
+			}
 		} else {
 			this.room.say(user.name + " counted incorrectly!");
 			for (let userID in this.players) {
 				let player = this.players[userID];
 				let points = this.points.get(player) || 0;
 				if (userID === user.id) {
-					player.say("You counted incorrectly, and so lost " + 25 * (this.curCount - points) + " candies!");
-					this.addBits(25 * (this.curCount - points), player.name);
+					player.say("You counted incorrectly, and so lost " + 25 * (this.curCount - points) + " bits!");
+					Games.addBits(25 * (this.curCount - points), player.name);
 				} else {
-					player.say("You earned " + 25 * points + " candies!");
-					this.addBits(25 * points, player.name);
+					player.say("You earned " + 25 * points + " bits!");
+					Games.addBits(25 * points, player.name);
 				}
 			}
 			this.end();

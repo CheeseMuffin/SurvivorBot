@@ -42,6 +42,9 @@ class Pancham extends Games.Game {
 		this.numAdvanced = 0;
 		this.mons = null;
 		this.description = description;
+		this.firstPairer = null;
+		this.isFirst = true;
+		this.chieves = true;
 	}
 	onStart() {
 		this.nextRound();
@@ -76,6 +79,9 @@ class Pancham extends Games.Game {
 		}
 		if (this.playerCount === 1) {
 			this.room.say("**Winner:** " + this.players[Object.keys(this.players)[0]].name);
+			if (this.chieves) {
+				Games.addChieve("Pair Mania", this.players[Object.keys(this.players)[0]].name);
+			}
 			this.winUser(500, this.players[Object.keys(this.players)[0]]);
 			this.end();
 			return;
@@ -84,6 +90,7 @@ class Pancham extends Games.Game {
 			this.end();
 			return;
 		}
+		this.isFirst = true;
 		this.numAdvanced = 0;
 		this.advanced.clear();
 		let shuffled = shuffle(Object.keys(data));
@@ -155,6 +162,13 @@ class Pancham extends Games.Game {
 		if (param === 'gen') param = 'generation';
 		let pair = this.isParamPair(mon1, mon2, param, true);
 		if (pair) {
+			if (this.isFirst) {
+				if (this.firstPairer && this.firstPairer.name !== player.name) {
+					this.chieves = false;
+				}
+				this.firstPairer = player;
+				this.isFirst = false;
+			}
 			this.advanced.set(player, true);
 			player.say("You have paired " + pair[0] + " and " + pair[1] + " and advanced to the next round!");
 			this.mons.splice(this.mons.indexOf(pair[0]), 1);

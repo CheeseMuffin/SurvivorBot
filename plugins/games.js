@@ -55,30 +55,7 @@ class Game {
 		player.say("You were awarded " + numBits + " bits for winning the game! You can use the command ``" + Config.commandCharacter + "bits`` to check your bits.");
 		Games.addBits(numBits, player.name);
 	}
-	addChieve(chieveName, username) {
-		fs.readFile('chieves.txt', function (err, data) {
-			if (err) {
-				console.error(err);
-			}
-			data = JSON.parse(data);
-			let stuff = [];
-			for (let key in data) {
-				if (Tools.toId(key) === Tools.toId(username)) {
-					stuff = data[key];
-					if (stuff.indexOf(chieveName) !== -1) return;
-					stuff.add(chieveName);
-					data[key] = stuff;
-					break;
-				}
-			}
-			if (stuff.length === 0) {
-				data[username] = [chieveName];
-			}
-			Users.get(username).say("You got the chieve " + chieveName + " and received 500 bits!");
-			fs.writeFile('chieves.txt', JSON.stringify(data));
-			Games.addBits(500, username);
-		});
-	}
+
 	start() {
 		if (this.started) return;
 		if (this.playerCount < 2) {
@@ -327,6 +304,31 @@ class Plugin {
 				data[username] = numBits;
 			}
 			fs.writeFile('bits.txt', JSON.stringify(data));
+		});
+	}
+
+	addChieve(chieveName, username) {
+		fs.readFile('chieves.txt', function (err, data) {
+			if (err) {
+				console.error(err);
+			}
+			data = JSON.parse(data);
+			let stuff = [];
+			for (let key in data) {
+				if (Tools.toId(key) === Tools.toId(username)) {
+					stuff = data[key];
+					if (stuff.indexOf(chieveName) !== -1) return;
+					stuff.add(chieveName);
+					data[key] = stuff;
+					break;
+				}
+			}
+			if (stuff.length === 0) {
+				data[username] = [chieveName];
+			}
+			Users.get(username).say("You got the chieve " + chieveName + " and received 500 bits!");
+			fs.writeFile('chieves.txt', JSON.stringify(data));
+			Games.addBits(500, username);
 		});
 	}
 }

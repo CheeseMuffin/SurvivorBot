@@ -51,7 +51,7 @@ class BerryTrivia extends Games.Game {
 		let category = this.categories[Math.floor(Math.random() * this.categories.length)];
 		let question = this.questions[category][Math.floor(Math.random() * this.questions[category].length)];
 		this.answers = data[category][question];
-		this.say("**" + category + "**: " + question);
+		this.say("**[" + category + "]**: __" + question + "__");
 		this.timeout = setTimeout(() => this.nextRound(), 10 * 1000);
 	}
 
@@ -75,7 +75,7 @@ class BerryTrivia extends Games.Game {
 		if (points >= this.maxPoints) {
 			this.say("Correct! " + user.name + " wins the game! (Answer" + (this.answers.length > 1 ? "s" : "") + ": __" + this.answers.join(", ") + "__)");
 			if (this.round === this.maxPoints) {
-				this.addChieve("Berry-Nerd", user.name);
+				Games.addChieve("Berry-Nerd", user.name);
 			}
 			this.winUser(500, player);
 			this.end();

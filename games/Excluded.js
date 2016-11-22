@@ -153,6 +153,9 @@ class Excluded extends Games.Game {
 		this.guessed = true;
 		if (Tools.toId(target) === Tools.toId(this.param)) {
 			this.say(player.name + " has guessed the correct parameter (__" + this.param + "__) and won the game!");
+			if (this.round === 1) {
+				Games.addChieves("Hax", user.name);
+			}
 			clearTimeout(this.timeout);
 			this.winUser(500, player);
 			this.timeout = null;

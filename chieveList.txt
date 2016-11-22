@@ -2,4 +2,11 @@
  "Berry-Nerd": "In a game of Berry Trivia, get every answer in one game.",
  "Poke-Nerd": "In a game of Trivia, get every answer in one game.",
  "Bombs Away": "In a game of Hangman Bomb, reach 10 lives.",
- "Letter Professional": "In a game of Piplup's Letter Placement, get answer answer in one game"}
+ "Letter Professional": "In a game of Piplup's Letter Placement, get every answer in one game.",
+ "No Blanks": "In a game of Inverse Lost Letters, get every answer in one game.",
+ "Mashed Potatoes": "In a game of Mashups, get every answer in one game.",
+ "In Order": "In a game of Orders, get every answer in one game.",
+ "Hax": "In a game of Excluded, guess the parameter on the first round",
+ "Pair Mania": "In a game of Pancham's Pairs, be the first to pair in every round.",
+ "Count Dracula": "In a game of Count, be the person to count to 100.",
+ "Power Play": "In a game of Pupitar's Power Placement, get every answer in one game."}

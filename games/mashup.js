@@ -86,6 +86,9 @@ class Mashups extends Games.Game {
 		this.points.set(player, points);
 		if (points >= this.maxPoints) {
 			this.room.say("Correct! " + user.name + " wins the game! (Answer: __" + this.answers.join(" and ") + "__)");
+			if (this.round === this.maxPoints) {
+				Games.addChieve("Mashed Potatoes", user.name);
+			}
 			this.winUser(500, player);
 			this.end();
 			return;
