@@ -1,10 +1,10 @@
 ﻿{
-	"name": "Cassius",
+	"name": "BotStuff",
 	"version": "0.0.1",
 	"description": "A bot for Pokemon Showdown",
 	"author": {
-		"name": "Quinton Lee",
-		"email": "quivistis@gmail.com"
+		"name": "Luke Harmon",
+		"email": "vellottionline@ucla.edu"
 	},
 	"scripts": {
 		"start": "node app.js",
@@ -13,7 +13,7 @@
 	"main": "app.js",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/sirDonovan/Cassius.git"
+		"url": "https://github.com/CheeseMuffin/BotStuff.git"
 	},
 	"dependencies": {
 		"websocket": "1.0.23"
