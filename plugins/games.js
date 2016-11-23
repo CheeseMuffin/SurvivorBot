@@ -58,7 +58,7 @@ class Game {
 
 	start() {
 		if (this.started) return;
-		if (this.playerCount < 2) {
+		if (this.playerCount < 1) {
 			this.say("The game needs at least two players to start!");
 			return;
 		}
@@ -364,6 +364,11 @@ let commands = {
 		if (typeof room.game.guess === 'function') room.game.guess(target, user);
 	},
 
+	roll: function (target, room, user) {
+		if (!room.game) return;
+		if (typeof room.game.roll === 'function') room.game.roll(target, user);
+	},
+	
 	pair: function (target, room, user) {
 		if (!room.game) return;
 		if (typeof room.game.pair === 'function') room.game.pair(target, user);
@@ -428,6 +433,11 @@ let commands = {
 	pick: function (target, room, user) {
 		if (!room.game) return;
 		if (typeof room.game.pick === 'function') room.game.pick(target, user);
+	},
+	
+	play: function (target, room, user) {
+		if (!room.game) return;
+		if (typeof room.game.play === 'function') room.game.play(target, user);
 	},
 
 	exclude: function (target, room, user) {
