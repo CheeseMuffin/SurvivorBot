@@ -24,8 +24,7 @@ class Room {
 			//console.log(realGame);
 			if (Tools.toId(realGame) === Tools.toId(gameName)) {
 				realName = realGame;
-			}
-			else {
+			} else {
 				let aliases = Games.aliases[realGame];
 				let found = false;
 				for (let i = 0, len = aliases.length; i < len; i++) {
@@ -40,13 +39,12 @@ class Room {
 		}
 		if (!realName) {
 			user.say("That is not a valid game!");
-		}
-		else {
+		} else {
 			user.say("Thanks for suggesting " + realName + ".");
 			this.votes[user] = realName;
 		}
 	}
-	
+
 	doGame() {
 		this.canVote = false;
 		this.say("**Time's up!**");
@@ -54,17 +52,14 @@ class Room {
 		for (let user in this.votes) {
 			games.push(this.votes[user]);
 		}
-		let gameName;
 		if (games.length === 0) {
 			for (let key in Games.aliases) {
 				games.push(key);
 			}
-
 		}
 		games = Tools.shuffle(games);
-		gameName = Tools.toId(games[0]);		
 		console.log(Tools.toId(games[0]));
-		this.game = new Games.games[Tools.toId(games[0])].game(this);
+		this.game = new Games.games[Tools.toId(games[0])].game(this); // eslint-disable-line new-cap
 		this.game.signups();
 	}
 
@@ -160,7 +155,7 @@ class Room {
 			break;
 
 		case 'tournament':
-			Tournaments.handleMessage(splitMessage, this);
+			Tournaments.handleMessage(splitMessage, this); // eslint-disable-line no-undef
 			break;
 
 		case 'updatechallenges':
@@ -175,16 +170,16 @@ class Room {
 			break;
 		case 'request':
 			stuff = JSON.parse(splitMessage[0]);
-			Battles.handleRequest(stuff, this);
+			Battles.handleRequest(stuff, this); // eslint-disable-line no-undef
 			break;
 		case 'turn':
 			console.log("hi");
 			stuff = JSON.parse(splitMessage[0]);
-			Battles.move(this, stuff);
+			Battles.move(this, stuff); // eslint-disable-line no-undef
 			break;
 		case 'switch':
 			stuff = splitMessage[0];
-			Battles.handleSwitch(this, stuff);
+			Battles.handleSwitch(this, stuff); // eslint-disable-line no-undef
 			break;
 		}
 	}

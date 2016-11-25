@@ -10,11 +10,11 @@ const colors = {
 	"$": "71FF00",
 };
 const cards = {
-	"galladesfocuspunch": {name: "Gallade's Focus Punch", cost: 600, canTarget: true, effect: {duration: 1,coin: -200, spaces: -4}},
-	"mismagiusscurse": {name: "Mismagius's Curse", cost: 600, canTarget: true, effect: {duration: 1,rollMax: 3}},
+	"galladesfocuspunch": {name: "Gallade's Focus Punch", cost: 600, canTarget: true, effect: {duration: 1, coin: -200, spaces: -4}},
+	"mismagiusscurse": {name: "Mismagius's Curse", cost: 600, canTarget: true, effect: {duration: 1, rollMax: 3}},
 	"tentacruelstoxicspikes": {name: "Tentacruel's Toxic Spikes", cost: 300, targetSquare: true, effect: {duration:2, rollCut: 2}},
 	"pinecosspikes": {name: "Pineco's Spikes", cost: 200, targetSquare: true, effect: {duration: 1, rollMax: 4}},
-	"accelgorsagility": {name: "Accelgor's Agility", cost: 300, effect: {duration: 1,rollCut: -2}},
+	"accelgorsagility": {name: "Accelgor's Agility", cost: 300, effect: {duration: 1, rollCut: -2}},
 };
 
 const data = {
@@ -71,31 +71,28 @@ class Pikachu extends Games.Game {
 		this.categories = Object.keys(data);
 		this.map = [];
 		this.timerPerAction = 30;
-		this.numGoodSquares = 2*(this.numRows+this.numCols) - 4;
+		this.numGoodSquares = 2 * (this.numRows + this.numCols) - 4;
 		this.games = ["Anagrams", "Inverse Lost Letters"];
 		let arr = [];
 		for (let i = 0; i < this.numGoodSquares; i++) {
 			arr.push(i);
 		}
 		arr = Tools.shuffle(arr);
-		arr = arr.slice(0,2);
+		arr = arr.slice(0, 2);
 		let cur = 0;
 		for (let i = 0; i < this.numRows; i++) {
 			this.map.push([]);
 			for (let j = 0; j < this.numCols; j++) {
 				let addstr;
-				if (j > 0 && j < (this.numCols-1) && i > 0 && i < (this.numRows-1)) {
+				if (j > 0 && j < (this.numCols - 1) && i > 0 && i < (this.numRows - 1)) {
 					addstr = " ";
-				}
-				else {
+				} else {
 					if (arr.indexOf(cur) !== -1) {
 						addstr = "$";
-					}
-					else {
+					} else {
 						if (Math.random() < 0.4) {
 							addstr = "o";
-						}
-						else {
+						} else {
 							addstr = "x";
 						}
 					}
@@ -122,10 +119,9 @@ class Pikachu extends Games.Game {
 			for (let j = 0; j < this.numCols; j++) {
 				let cur = this.map[i][j];
 				let color;
-				if (i === (this.numRows-1) && j == 0) {
+				if (i === (this.numRows - 1) && j === 0) {
 					color = "000000";
-				}
-				else {
+				} else {
 					color = colors[cur];
 				}
 				newstr += "<td style=background-color:#" + color + "; width=\"20px\" height=\"20px\"; align=\"center\"><b> </b></td>";
@@ -142,14 +138,13 @@ class Pikachu extends Games.Game {
 		this.say("Everyone will begin in the lower left corner!");
 		for (let userID in this.players) {
 			let player = this.players[userID];
-			this.spaces.set(player, [this.numRows-1,0]);
+			this.spaces.set(player, [this.numRows - 1, 0]);
 			this.coins.set(player, 0);
 			this.cards.set(player, []);
 		}
 		this.nextRound();
-		
 	}
-	
+
 	onNextRound() {
 		this.order = Tools.shuffle(Object.keys(this.players));
 		this.nextPlayer();
@@ -157,28 +152,23 @@ class Pikachu extends Games.Game {
 	getDirection(curSpace) {
 		let curX = curSpace[0];
 		let curY = curSpace[1];
-		if (curX === (this.numRows-1)) {
+		if (curX === (this.numRows - 1)) {
 			if (curY === (this.numCols - 1)) {
-				return [-1,0];
+				return [-1, 0];
+			} else {
+				return [0, 1];
 			}
-			else {
-				return [0,1];
-			}
-		}
-		else if (curX === 0) {
+		} else if (curX === 0) {
 			if (curY === 0) {
-				return [1,0];
+				return [1, 0];
+			} else {
+				return [0, -1];
 			}
-			else {
-				return [0,-1];
-			}
-		}
-		else {
+		} else {
 			if (curY === 0) {
-				return [1,0];
-			}
-			else {
-				return [-1,0];
+				return [1, 0];
+			} else {
+				return [-1, 0];
 			}
 		}
 	}
@@ -203,7 +193,7 @@ class Pikachu extends Games.Game {
 			this.guessed = false;
 			let curSpace = this.spaces.get(this.curPlayer);
 			let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-			this.say("It is now " + this.curPlayer.name + "'s turn. They are located at **(" + letters[curSpace[0]] + "," + (curSpace[1]+1) + ")**. Please choose: ``" + Config.commandCharacter + "roll`` or ``" + Config.commandCharacter + "play [card]``");
+			this.say("It is now " + this.curPlayer.name + "'s turn. They are located at **(" + letters[curSpace[0]] + "," + (curSpace[1] + 1) + ")**. Please choose: ``" + Config.commandCharacter + "roll`` or ``" + Config.commandCharacter + "play [card]``");
 			this.timeout = setTimeout(() => this.rollP(), this.timerPerAction * 1000);
 		}
 	}
@@ -214,23 +204,23 @@ class Pikachu extends Games.Game {
 		let effects = this.effects.get(this.curPlayer);
 		if (effects) {
 			if (effects.rollMax) {
-				let curMax = effects.rollMax;
+				curMax = effects.rollMax;
 			}
 			if (effects.rollCut) {
-				let adder = effects.rollCut;
+				adder = effects.rollCut;
 			}
 			if (effects.coins) {
-				let curCoins = this.coins.get(player) || 0;
+				let curCoins = this.coins.get(this.curPlayer) || 0;
 				curCoins -= effects.coins;
 				if (curCoins < 0) {
 					curCoins = 0;
 				}
-				this.coins.set(player, 0);
+				this.coins.set(this.curPlayer, 0);
 			}
 		}
 		let points = this.points.get(this.curPlayer) || 0;
 		curMax += points;
-		let roll = Math.floor(Math.random()*curMax) + 1 + adder;
+		let roll = Math.floor(Math.random() * curMax) + 1 + adder;
 		let curSpace = this.spaces.get(this.curPlayer);
 		for (let i = 0; i < roll; i++) {
 			let curDir = this.getDirection(curSpace);
@@ -252,7 +242,6 @@ class Pikachu extends Games.Game {
 				break;
 			}
 		}
-		let type = "";
 		let beginstr = (this.curPlayer.name + " rolled a " + curMax + "-sided die and rolled a " + roll + "!");
 		console.log(curSpace[0] + " " + curSpace[1] + " " + this.map[curSpace[0]][curSpace[1]]);
 		if (this.map[curSpace[0]][curSpace[1]] === 'o') {
@@ -263,30 +252,27 @@ class Pikachu extends Games.Game {
 			this.say(beginstr + " They landed on a card space and drew a " + card.name + "!");
 			if (trapLand) {
 				this.say("They also landed on a trap card of " + badCard.effects);
-				this.effects.set(this.curPlayer,badCard.effects);
+				this.effects.set(this.curPlayer, badCard.effects);
 			}
 			let curCards = this.cards.get(this.curPlayer);
 			curCards.push(card);
 			this.cards.set(this.curPlayer, curCards);
 			this.nextPlayer();
-		}
-		else if (this.map[curSpace[0]][curSpace[1]] === '$') {
+		} else if (this.map[curSpace[0]][curSpace[1]] === '$') {
 			this.say(beginstr + " They landed on a shop. Would they like to go in? (``" + Config.commandCharacter + "no`` or ``" + Config.commandCharacter + "yes``)");
 			this.canShop = true;
 			this.timeout = setTimeout(() => this.nextPlayer(), this.timerPerAction * 1000);
-		}
-		else {
+		} else {
 			this.say(beginstr + " They landed on an empty space.");
 			if (trapLand) {
 				this.say("They also landed on a trap card of " + badCard.effects);
-				this.effects.set(this.curPlayer,badCard.effects);
+				this.effects.set(this.curPlayer, badCard.effects);
 			}
 			this.nextPlayer();
 		}
 		console.log("curspace: " + curSpace);
-		
 	}
-	
+
 	roll(target, user) {
 		let player = this.players[user.id];
 		if (!player || !this.curPlayer || player.id !== this.curPlayer.id) return;
@@ -294,7 +280,7 @@ class Pikachu extends Games.Game {
 		clearTimeout(this.timeout);
 		this.rollP();
 	}
-	
+
 	play(target, user) {
 		let player = this.players[user.id];
 		if (!player || !this.curPlayer || player.id !== this.curPlayer.id) return;
@@ -314,48 +300,42 @@ class Pikachu extends Games.Game {
 			this.say("You don't have that card!");
 			return;
 		}
-		curCards.splice(i,1);
-		this.cards.set(player,curCards);
+		curCards.splice(i, 1);
+		this.cards.set(player, curCards);
 		if (card.canTarget) {
 			if (playList.length === 1) {
 				this.say("Usage: ``" + Config.commandCharacter + "play " + card.name + ", [username]``");
 				return;
-			}
-			else {
+			} else {
 				let playerAttack = this.players[Tools.toId(playList[1])];
 				if (!playerAttack) {
 					this.say("That player is not in the game!");
-				}
-				else {
+				} else {
 					this.say("You have attacked " + playerAttack.name + "!");
-					this.effects.set(playerAttack,card.effect);
+					this.effects.set(playerAttack, card.effect);
 				}
 			}
-		}
-		else if (card.targetSquare) {
+		} else if (card.targetSquare) {
 			if (playList.length < 3) {
 				this.say("Usage: ``" + Config.commandCharacter + "play " + card.name + ", [row], [column]``");
-			}
-			else {
+			} else {
 				let letters = "abcdefghij";
 				let x = letters.indexOf(Tools.toId(playList[1]));
 				let y = Math.floor(Tools.toId(playList[2])) - 1;
-				if ((x !== 0 && x !== (this.numRows-1)) || (y !== 0 || y !== (this.numCols - 1))) {
+				if ((x !== 0 && x !== (this.numRows - 1)) || (y !== 0 || y !== (this.numCols - 1))) {
 					this.say("That square is not on the edge of the grid!");
 					return;
-				}
-				else {
+				} else {
 					this.say("You have placed a trap!");
-					this.spaceEffects[[x,y]] = card;
+					this.spaceEffects[[x, y]] = card;
 				}
 			}
-		}
-		else {
+		} else {
 			this.say("You have used a movement card!");
 			this.effects.set(player, card.effects);
 		}
 	}
-	
+
 	doGame() {
 		this.points.clear();
 		this.game = this.games[Math.floor(Math.random() * this.games.length)];
@@ -367,7 +347,7 @@ class Pikachu extends Games.Game {
 		let vowels = ["a", "e", "i", "o", "u", " "];
 		return (vowels.indexOf(Tools.toId(ch)) !== -1);
 	}
-	
+
 	convert(str) {
 		let newstr = "";
 		str = Tools.toId(str);
@@ -378,7 +358,7 @@ class Pikachu extends Games.Game {
 		}
 		return newstr;
 	}
-	
+
 	nextQuestion() {
 		if (this.answers) {
 			this.say("Time's up! The answer" + (this.answers.length > 1 ? "s were" : " was") + " __" + this.answers.join(", ") + "__");
@@ -395,8 +375,7 @@ class Pikachu extends Games.Game {
 			chars = Tools.shuffle(chars);
 			this.say("**[" + this.category + "]** __" + chars.join(", ") + "__");
 			this.timeout = setTimeout(() => this.nextQuestion(), 10 * 1000);
-		}
-		else if (this.game === "Inverse Lost Letters") {
+		} else if (this.game === "Inverse Lost Letters") {
 			this.maxPoints = 3;
 			this.category = "Pokemon";//this.categories[Math.floor(Math.random() * this.categories.length)];
 			let x = Math.floor(Math.random() * data[this.category].length);
@@ -407,12 +386,11 @@ class Pikachu extends Games.Game {
 					this.answers.push(data[this.category][i]);
 				}
 			}
-			
 			this.say("**[" + this.category + "]**: __" + answer + "__");
 			this.timeout = setTimeout(() => this.nextQuestion(), 20 * 1000);
 		}
 	}
-	
+
 	guess(guess, user) {
 		if (!this.answers) return;
 		guess = Tools.toId(guess);
@@ -441,7 +419,7 @@ class Pikachu extends Games.Game {
 		this.answers = null;
 		this.timeout = setTimeout(() => this.nextQuestion(), 5 * 1000);
 	}
-	
+
 	hand(target, user) {
 		let player = this.players[user.id];
 		if (!player) return;
@@ -452,12 +430,11 @@ class Pikachu extends Games.Game {
 		}
 		if (cards.length === 0) {
 			user.say("You don't have any cards!");
-		}
-		else {
+		} else {
 			user.say("Current hand: " + strs.join(", "));
 		}
 	}
-	
+
 	yes(user) {
 		let player = this.players[user.id];
 		if (!player || !this.canShop || !this.curPlayer || player.id !== this.curPlayer.id) return;
@@ -478,14 +455,24 @@ class Pikachu extends Games.Game {
 		clearTimeout(this.timeout);
 		this.timeout = setTimeout(() => this.nextPlayer(), this.timerPerAction * 1000);
 	}
-	
+
 	no(user) {
 		let player = this.players[user.id];
 		if (!player || !this.canShop || !this.curPlayer || player.id !== this.curPlayer.id) return;
 		clearTimeout(this.timeout);
 		this.nextPlayer();
 	}
-	
+
+	coins(user) {
+		let player = this.players[user.id];
+		if (!player) return;
+		let numCoins = this.coins.get(player);
+		if (numCoins === 0) {
+			user.say("You don't have any coins!");
+		} else {
+			user.say("You currently have " + numCoins + " coins!");
+		}
+	}
 	buy(target, user) {
 		target = Tools.toId(target);
 		let player = this.players[user.id];
@@ -503,7 +490,7 @@ class Pikachu extends Games.Game {
 		this.canBuy = false;
 		this.nextPlayer();
 	}
-	
+
 	leaveshop(user) {
 		let player = this.players[user.id];
 		if (!player || !this.canBuy || !this.curPlayer || player.id !== this.curPlayer.id) return;

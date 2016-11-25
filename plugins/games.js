@@ -53,7 +53,7 @@ class Game {
 
 	winUser(numBits, player) {
 		player.say("You were awarded " + numBits + " bits for winning the game! You can use the command ``" + Config.commandCharacter + "bits`` to check your bits.");
-		Games.addBits(numBits, player.name);
+		Games.addBits(numBits, player.name); // eslint-disable-line no-use-before-define
 	}
 
 	start() {
@@ -334,7 +334,7 @@ class Plugin {
 			}
 			Users.get(username).say("You got the chieve " + chieveName + " and received 500 bits!");
 			fs.writeFile('chieves.txt', JSON.stringify(data));
-			Games.addBits(500, username);
+			Games.addBits(500, username); // eslint-disable-line no-use-before-define
 		});
 	}
 }
@@ -374,7 +374,7 @@ let commands = {
 		if (!room.game) return;
 		if (typeof room.game.roll === 'function') room.game.roll(target, user);
 	},
-	
+
 	pair: function (target, room, user) {
 		if (!room.game) return;
 		if (typeof room.game.pair === 'function') room.game.pair(target, user);
@@ -425,8 +425,7 @@ let commands = {
 			room.votes = new Map();
 			room.canVote = true;
 			room.timeout = setTimeout(() => room.doGame(), 30 * 1000);
-		}
-		else {
+		} else {
 			room.vote(target, user);
 		}
 	},
@@ -455,10 +454,15 @@ let commands = {
 		if (!room.game) return;
 		if (typeof room.game.pick === 'function') room.game.pick(target, user);
 	},
-	
+
 	play: function (target, room, user) {
 		if (!room.game) return;
 		if (typeof room.game.play === 'function') room.game.play(target, user);
+	},
+
+	coins: function (target, room, user) {
+		if (!room.game) return;
+		if (typeof room.game.coins === 'function') room.game.coins(user);
 	},
 
 	exclude: function (target, room, user) {
@@ -470,7 +474,7 @@ let commands = {
 		if (!room.game) return;
 		if (typeof room.game.leaveshop === 'function') room.game.leaveshop(user);
 	},
-	
+
 	buy: function (target, room, user) {
 		if (!room.game) return;
 		if (typeof room.game.buy === 'function') room.game.buy(target, user);
@@ -503,7 +507,7 @@ let commands = {
 		if (!room.game) return;
 		if (typeof room.game.attack === 'function') room.game.attack(target, user);
 	},
-	
+
 	hand: function (target, room, user) {
 		if (!room.game) return;
 		if (typeof room.game.hand === 'function') room.game.hand(target, user);
@@ -520,7 +524,7 @@ let commands = {
 		if (!room.game) return;
 		if (typeof room.game.no === 'function') room.game.no(user);
 	},
-	
+
 	nominate: 'nom',
 	nom: function (target, room, user) {
 		if (!room.game) return;
