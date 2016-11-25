@@ -34,10 +34,11 @@ class Count extends Games.Minigame {
 				let points = this.points.get(player) || 0;
 				if (userID === user.id) {
 					player.say("You counted incorrectly, and so lost " + 25 * (this.curCount - points) + " bits!");
-					Games.addBits(25 * (this.curCount - points), player.name);
+					
+					//Games.addBits(25 * (this.curCount - points), player.name);
 				} else {
 					player.say("You earned " + 25 * points + " bits!");
-					Games.addBits(25 * points, player.name);
+					//Games.addBits(25 * points, player.name);
 				}
 			}
 			this.end();

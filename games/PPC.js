@@ -136,6 +136,7 @@ class PPC extends Games.Game {
 		let player = this.players[user.id];
 		if (!player || player.id !== this.curPlayer.id) return;
 		guess = Tools.toId(guess);
+		let found = true;
 		if (this.curUsed.indexOf(guess) !== -1) return;
 		if (isPort(guess, Tools.toId(this.curMon))) {
 			this.curMon = Tools.data.pokedex[guess].species;

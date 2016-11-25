@@ -1,6 +1,6 @@
 /**
  * App
- * Cassius - https://github.com/sirDonovan/Cassius
+ * Cassius - https://github.com/CheeseMuff/BotStuff
  *
  * This is the main file that starts Cassius.
  *

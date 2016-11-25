@@ -13,7 +13,59 @@ class Room {
 	constructor(id) {
 		this.id = id;
 		this.clientId = id === 'lobby' ? '' : id;
+		this.canVote = false;
 		this.users = new Map();
+		this.votes = {};
+	}
+
+	vote(gameName, user) {
+		let realName;
+		for (let realGame in Games.aliases) {
+			//console.log(realGame);
+			if (Tools.toId(realGame) === Tools.toId(gameName)) {
+				realName = realGame;
+			}
+			else {
+				let aliases = Games.aliases[realGame];
+				let found = false;
+				for (let i = 0, len = aliases.length; i < len; i++) {
+					if (Tools.toId(aliases[i]) === Tools.toId(gameName)) {
+						realName = realGame;
+						found = true;
+						break;
+					}
+				}
+				if (found) break;
+			}
+		}
+		if (!realName) {
+			user.say("That is not a valid game!");
+		}
+		else {
+			user.say("Thanks for suggesting " + realName + ".");
+			this.votes[user] = realName;
+		}
+	}
+	
+	doGame() {
+		this.canVote = false;
+		this.say("**Time's up!**");
+		let games = [];
+		for (let user in this.votes) {
+			games.push(this.votes[user]);
+		}
+		let gameName;
+		if (games.length === 0) {
+			for (let key in Games.aliases) {
+				games.push(key);
+			}
+
+		}
+		games = Tools.shuffle(games);
+		gameName = Tools.toId(games[0]);		
+		console.log(Tools.toId(games[0]));
+		this.game = new Games.games[Tools.toId(games[0])].game(this);
+		this.game.signups();
 	}
 
 	onJoin(user, rank) {

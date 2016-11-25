@@ -33,7 +33,7 @@ for (let i in Tools.data.abilities) {
 	data["Pokemon Ability"].push(ability.name);
 }
 
-const name = "Piplup's Placements";
+const name = "Piplup's Letter Placements";
 const id = Tools.toId(name);
 const description = "The host will show you a topic and 3 letters. You must find something of that topic that contains those letters side by side, in the order given. **Command:** ``" + Config.commandCharacter + "g [answer]``";
 

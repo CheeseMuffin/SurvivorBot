@@ -89,7 +89,6 @@ class Pidove extends Games.Game {
 			this.curPlayer = bestPlayers[0];
 			this.say(this.curPlayer.name + " was nominated to go next!");
 		} else if (bestPlayers.length > 1) {
-			console.log(bestPlayers.length);
 			this.curPlayer = bestPlayers[Math.floor(Math.random() * bestPlayers.length)];
 			this.say("Voting resulted in a tie, and " + this.curPlayer.name + " was randomly chosen to go next!");
 		} else {
@@ -185,9 +184,7 @@ class Pidove extends Games.Game {
 		let points = this.points.get(oplayer) || 0;
 		this.points.set(oplayer, points + 1);
 		this.numNominations++;
-		console.log(this.playerCount);
 		if (this.numNominations === this.playerCount) {
-			console.log(this.numNominations);
 			clearTimeout(this.timeout);
 			this.nominatePlayer();
 		}
@@ -195,7 +192,6 @@ class Pidove extends Games.Game {
 
 	elim(target, user) {
 		if (!this.canElim || user.id !== this.curPlayer.id) return;
-		console.log("hi");
 		let oplayer = this.players[Tools.toId(target)];
 		if (!oplayer) return;
 		if (oplayer.id === this.curPlayer.id) {
@@ -206,7 +202,6 @@ class Pidove extends Games.Game {
 			this.say("You must eliminate someone that nominated you!");
 			return;
 		}
-		console.log("ok");
 		clearTimeout(this.timeout);
 		this.elimPlayer(oplayer);
 	}

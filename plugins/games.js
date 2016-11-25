@@ -205,6 +205,7 @@ class Plugin {
 	constructor() {
 		this.name = 'Games';
 		this.games = {};
+		this.aliases = {};
 	}
 
 	onLoad() {
@@ -223,6 +224,8 @@ class Plugin {
 			if (!file.endsWith('.js')) continue;
 			file = require('./../games/' + file);
 			if (file.game && file.name && file.id) this.games[file.id] = file;
+			this.aliases[file.name] = file.aliases;
+			//console.log(file.aliases);
 		}
 	}
 
@@ -243,6 +246,8 @@ class Plugin {
 	}
 
 	createMiniGame(game, room) {
+		if (room.game) return room.say("A game is already in progress!");
+		if (room.canVote) return room.say("Voting is in progress");
 		this.loadGames();
 		let id = Tools.toId(game);
 		for (let fileID in this.games) {
@@ -261,6 +266,7 @@ class Plugin {
 	}
 	createGame(game, room) {
 		this.loadGames();
+		if (room.canVote) return room.say("Voting is in progress");
 		if (room.game) {
 			if (room.game.minigame) {
 				return room.say("A minigame is in progress!");
@@ -410,6 +416,21 @@ let commands = {
 		}
 	},
 
+	suggest: 'vote',
+	vote: function (target, room, user) {
+		if (room.game) return;
+		if (!room.canVote) {
+			if (!user.hasRank(room, '+')) return;
+			room.say("Vote for the next game with ``" + Config.commandCharacter + "vote [game]!``");
+			room.votes = new Map();
+			room.canVote = true;
+			room.timeout = setTimeout(() => room.doGame(), 30 * 1000);
+		}
+		else {
+			room.vote(target, user);
+		}
+	},
+
 	steal: function (target, room, user) {
 		if (!room.game) return;
 		if (typeof room.game.steal === 'function') room.game.steal(target, user);
@@ -444,6 +465,17 @@ let commands = {
 		if (!room.game) return;
 		if (typeof room.game.exclude === 'function') room.game.exclude(target, user);
 	},
+
+	leaveshop: function (target, room, user) {
+		if (!room.game) return;
+		if (typeof room.game.leaveshop === 'function') room.game.leaveshop(user);
+	},
+	
+	buy: function (target, room, user) {
+		if (!room.game) return;
+		if (typeof room.game.buy === 'function') room.game.buy(target, user);
+	},
+
 	guessExclude: 'ge',
 	ge: function (target, room, user) {
 		if (!room.game) return;
@@ -471,13 +503,29 @@ let commands = {
 		if (!room.game) return;
 		if (typeof room.game.attack === 'function') room.game.attack(target, user);
 	},
+	
+	hand: function (target, room, user) {
+		if (!room.game) return;
+		if (typeof room.game.hand === 'function') room.game.hand(target, user);
+	},
 
+	yes: 'y',
+	y: function (target, room, user) {
+		if (!room.game) return;
+		if (typeof room.game.yes === 'function') room.game.yes(user);
+	},
+
+	no: 'n',
+	n: function (target, room, user) {
+		if (!room.game) return;
+		if (typeof room.game.no === 'function') room.game.no(user);
+	},
+	
 	nominate: 'nom',
 	nom: function (target, room, user) {
 		if (!room.game) return;
 		if (typeof room.game.nom === 'function') room.game.nom(target, user);
 	},
-
 	eliminate: 'elim',
 	elim: function (target, room, user) {
 		if (!room.game) return;
