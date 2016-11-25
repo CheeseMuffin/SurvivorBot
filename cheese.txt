@@ -1,4 +1,0 @@
-Successfully connected to server dragonheaven.psim.us
-Successfully logged in
-Joined room: test
-<table width = "100%"> <tbody> <tr> <td>o</td> <td>o</td> <td>o</td> <td>o</td> <td>o</td> <td>o</td></tr><tr><td>o</td> <td>o</td> <td>o</td> <td>o</td> <td>o</td> <td>o</td></tr><tr><td>o</td> <td>o</td> <td>o</td> <td>o</td> <td>o</td> <td>o</td></tr><tr><td>o</td> <td>o</td> <td>o</td> <td>o</td> <td>o</td> <td>o</td></tr><tr><td>o</td> <td>o</td> <td>o</td> <td>o</td> <td>o</td> <td>o</td></tr><tr><td>o</td> <td>o</td> <td>o</td> <td>o</td> <td>o</td> <td>o</td> </tr> </tbody> </table>
