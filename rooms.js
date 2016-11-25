@@ -1,6 +1,6 @@
 /**
  * Rooms
- * Cassius - https://github.com/sirDonovan/Cassius
+ * BotStuff - https://github.com/CheeseMuffin/BotStuff
  *
  * This file tracks information about the rooms that the bot joins.
  *

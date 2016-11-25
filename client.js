@@ -1,6 +1,6 @@
 /**
  * Client
- * Cassius - https://github.com/sirDonovan/Cassius
+ * BotStuff - https://github.com/CheeseMuffin/BotStuff
  *
  * This file connects to the server and handles incoming/outgoing messages.
  *

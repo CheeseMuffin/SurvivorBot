@@ -1,6 +1,6 @@
 /**
  * Users
- * Cassius - https://github.com/sirDonovan/Cassius
+ * BotStuff - https://github.com/CheeseMuffin/BotStuff
  *
  * This file tracks information about users.
  *

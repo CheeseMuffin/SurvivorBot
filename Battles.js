@@ -1,3 +1,12 @@
+/**
+ * Commands
+ * BotStuff - https://github.com/CheeseMuffin/BotStuff
+ *
+ * This file contains battling information for BotStuff.
+ *
+ * @license MIT license
+ */
+
 'use strict';
 
 class Battle {

@@ -1,8 +1,8 @@
 /**
  * Info
- * Cassius - https://github.com/sirDonovan/Cassius
+ * BotStuff - https://github.com/CheeseMuffin/BotStuff
  *
- * This file contains informational commands for Cassius.
+ * This file contains informational commands for BotStuff.
  *
  * @license MIT license
  */

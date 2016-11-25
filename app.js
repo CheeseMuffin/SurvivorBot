@@ -1,8 +1,8 @@
 /**
  * App
- * Cassius - https://github.com/CheeseMuff/BotStuff
+ * BotStuff - https://github.com/CheeseMuffin/BotStuff
  *
- * This is the main file that starts Cassius.
+ * This is the main file that starts BotStuff.
  *
  * @license MIT license
  */

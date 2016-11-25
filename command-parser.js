@@ -1,6 +1,6 @@
 /**
  * Command Parser
- * Cassius - https://github.com/sirDonovan/Cassius
+ * BotStuff - https://github.com/CheeseMuffin/BotStuff
  *
  * This file parses command messages.
  *

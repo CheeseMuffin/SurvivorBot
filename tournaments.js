@@ -1,5 +1,13 @@
-'use strict';
+/**
+ * Tournaments
+ * BotStuff - https://github.com/CheeseMuffin/BotStuff
+ *
+ * This file contains info about BotStuff joining Tournaments.
+ *
+ * @license MIT license
+ */
 
+'use strict';
 
 class Tournament {
 	constructor(room) {

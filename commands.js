@@ -2,7 +2,7 @@
  * Commands
  * BotStuff - https://github.com/CheeseMuffin/BotStuff
  *
- * This file contains the base commands for Cassius.
+ * This file contains the base commands for BotStuff.
  *
  * @license MIT license
  */

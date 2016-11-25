@@ -1,8 +1,8 @@
 /**
  * Games
- * Cassius - https://github.com/sirDonovan/Cassius
+ * BotStuff - https://github.com/CheeseMuffin/BotStuff
  *
- * This file contains the game system and related commands for Cassius.
+ * This file contains the game system and related commands for BotStuff.
  *
  * @license MIT license
  */

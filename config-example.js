@@ -1,8 +1,8 @@
 /**
  * Config (example)
- * Cassius - https://github.com/sirDonovan/Cassius
+ * BotStuff - https://github.com/CheeseMuffin/BotStuff
  *
- * Copy this file to 'config.js' before starting Cassius.
+ * Copy this file to 'config.js' before starting BotStuff.
  *
  * @license MIT license
  */
