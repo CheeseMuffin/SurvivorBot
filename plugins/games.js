@@ -53,9 +53,6 @@ for (let i in Tools.data.pokedex) {
 			let prevoMoves = data[prevoMon.species]["Pokemon Moves"];
 			for (let j = 0; j < prevoMoves.length; j++) {
 				if (data[species]["Pokemon Moves"].indexOf(prevoMoves[j]) === -1) {
-					if (species === "Lumineon") {
-						console.log("adding move " + prevoMoves[j]);
-					}
 					data[species]["Pokemon Moves"].push(prevoMoves[j]);
 					data[species]["stuff"].push(prevoMoves[j]);
 				}
@@ -285,7 +282,6 @@ class Plugin {
 			file = require('./../games/' + file);
 			if (file.game && file.name && file.id) this.games[file.id] = file;
 			this.aliases[file.name] = file.aliases;
-			//console.log(file.aliases);
 		}
 	}
 
@@ -419,12 +415,10 @@ class Plugin {
 		let monsList = mons.split(", ");
 		let sharedParams = [];
 		let firstParams = data[monsList[0]]["stuff"];
-		console.log("First mon is " + monsList[0]);
 		for (let i = 0; i < firstParams.length; i++) {
 			let bad = false;
 			for (let j = 1; j < monsList.length; j++) {
 				if (data[monsList[j]]["stuff"].indexOf(firstParams[i]) === -1) {
-					console.log(firstParams[i] + " " + monsList[j]);
 					bad = true;
 					break;
 				}
@@ -433,7 +427,6 @@ class Plugin {
 				sharedParams.push(firstParams[i]);
 			}
 		}
-		console.log(sharedParams);
 		if (numParams === 2) {
 			for (let i = 0; i < sharedParams.length; i++) {
 				for (let j = i + 1; j < sharedParams.length; j++) {
@@ -480,7 +473,6 @@ class Plugin {
 							}
 						}
 						if (!found) {
-							console.log(i + " " + j + " " + k);
 							user.say("A possible set of params is " + paramsList.join(", "));
 							return;
 						}
@@ -509,7 +501,6 @@ class Plugin {
 								}
 							}
 							if (!found) {
-								console.log(i + " " + j + " " + k);
 								user.say("A possible set of params is " + paramsList.join(", "));
 								return;
 							}
@@ -518,7 +509,6 @@ class Plugin {
 				}
 			}
 		}
-		console.log("done");
 		user.say("I couldn't find an answer for your param rip.");
 	}
 }
@@ -903,8 +893,6 @@ let commands = {
 			}
 			let found = false;
 			data = JSON.parse(data);
-			console.log(data);
-			console.log(userID);
 			for (let key in data) {
 				if (Tools.toId(userID) === Tools.toId(key)) {
 					room.say((userID === user.name ? "Your " : userID + "'s ") + "achievements: " + data[key].join(", "));
