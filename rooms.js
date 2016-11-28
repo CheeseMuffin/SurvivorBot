@@ -15,7 +15,7 @@ class Room {
 		this.clientId = id === 'lobby' ? '' : id;
 		this.canVote = false;
 		this.users = new Map();
-		this.votes = {};
+		this.votes = new Map();
 	}
 
 	vote(gameName, user) {
@@ -40,8 +40,21 @@ class Room {
 		if (!realName) {
 			user.say("That is not a valid game!");
 		} else {
-			user.say("Thanks for suggesting " + realName + ".");
-			this.votes[user] = realName;
+			if (Games.games[Tools.toId(realName)].minigame) {
+				user.say("You cannot suggest a minigame.");
+				return;
+			}
+			let blah = this.votes.get(user);
+			console.log(user.name + " suggested " + blah);
+			if (Games.pastGames[this.name] && Games.pastGames[this.name].indexOf(realName) !== -1) {
+				user.say(realName + " is on the past games list and cannot be voted for. Please choose something else!");
+				return;
+			} else if (blah) {
+				user.say("Your suggestion has been changed to " + realName);
+			} else {
+				user.say("Thanks for suggesting " + realName + ".");
+			}
+			this.votes.set(user, realName);
 		}
 	}
 
@@ -49,13 +62,23 @@ class Room {
 		this.canVote = false;
 		this.say("**Time's up!**");
 		let games = [];
-		for (let user in this.votes) {
-			games.push(this.votes[user]);
-		}
+		this.votes.forEach(function (key, value, map) {
+			games.push(key);
+		});
 		if (games.length === 0) {
 			for (let key in Games.aliases) {
 				games.push(key);
 			}
+		}
+		if (this.name in Games.pastGames) {
+			let cur = Games.pastGames[this.name];
+			cur.push(games[0]);
+			if (cur.length > 8) {
+				cur.splice(0, 1);
+			}
+			Games.pastGames[this.name] = cur;
+		} else {
+			Games.pastGames[this.name] = [games[0]];
 		}
 		games = Tools.shuffle(games);
 		console.log(Tools.toId(games[0]));

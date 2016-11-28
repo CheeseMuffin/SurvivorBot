@@ -10,6 +10,65 @@
 'use strict';
 
 const fs = require('fs');
+const data = {};
+const monForms = {};
+for (let i in Tools.data.pokedex) {
+	let mon = Tools.data.pokedex[i];
+	let species = mon.species;
+	data[species] = {};
+	data[species]["stuff"] = [mon.color];
+	for (let key in mon.abilities) {
+		data[species]["stuff"].push(mon.abilities[key]);
+	}
+	for (let j = 0; j < mon.types.length; j++) {
+		data[species]["stuff"].push(mon.types[j]);
+	}
+	if (mon.otherFormes) {
+		for (let j = 0, len = mon.otherFormes.length; j < len; j++) {
+			monForms[mon.otherFormes[j]] = species;
+		}
+	}
+	data[species]["stuff"].push(Tools.generation(mon.num));
+	if (species === "Smeargle") {
+		data[species]["Pokemon Moves"] = [];
+		for (let move in Tools.data.moves) {
+			data[species]["Pokemon Moves"].push(Tools.data.moves[move].name);
+			data[species]["stuff"].push(Tools.data.moves[move].name);
+		}
+	} else if (i in Tools.data.learnsets) {
+		data[species]["Pokemon Moves"] = [];
+		for (let move in Tools.data.learnsets[i].learnset) {
+			data[species]["Pokemon Moves"].push(Tools.data.moves[move].name);
+			data[species]["stuff"].push(Tools.data.moves[move].name);
+		}
+	} else if (i in monForms) {
+		data[species]["Pokemon Moves"] = data[monForms[i]]["Pokemon Moves"];
+		for (let j = 0; j < data[species]["Pokemon Moves"].length; j++) {
+			data[species]["stuff"].push(data[species]["Pokemon Moves"][j]);
+		}
+	}
+	if (mon.prevo) {
+		let prevoMon = Tools.data.pokedex[mon.prevo];
+		if (prevoMon.species in data) {
+			let prevoMoves = data[prevoMon.species]["Pokemon Moves"];
+			for (let j = 0; j < prevoMoves.length; j++) {
+				if (data[species]["Pokemon Moves"].indexOf(prevoMoves[j]) === -1) {
+					if (species === "Lumineon") {
+						console.log("adding move " + prevoMoves[j]);
+					}
+					data[species]["Pokemon Moves"].push(prevoMoves[j]);
+					data[species]["stuff"].push(prevoMoves[j]);
+				}
+			}
+		}
+	}
+	if (Tools.data.battle[i] && Tools.data.battle[i].tier) {
+		data[species]["stuff"].push(Tools.data.battle[i].tier);
+	} else if (i in monForms) {
+		data[species]["stuff"].push(Tools.data.battle[Tools.toId(monForms[i])].tier);
+	}
+}
+
 
 class Player {
 	constructor(user) {
@@ -206,6 +265,7 @@ class Plugin {
 		this.name = 'Games';
 		this.games = {};
 		this.aliases = {};
+		this.pastGames = {};
 	}
 
 	onLoad() {
@@ -287,6 +347,16 @@ class Plugin {
 		if (!(id in this.games)) return room.say("The game '" + game.trim() + "' was not found.");
 		if (this.games[id].minigame) return room.say("You cannot signup a minigame!");
 		room.game = new this.games[id].game(room); // eslint-disable-line new-cap
+		if (room.name in this.pastGames) {
+			let cur = this.pastGames[room.name];
+			cur.push(room.game.name);
+			if (cur.length > 8) {
+				cur.splice(0, 1);
+			}
+			this.pastGames[room.name] = cur;
+		} else {
+			this.pastGames[room.name] = [room.game.name];
+		}
 		room.game.signups();
 	}
 
@@ -337,6 +407,120 @@ class Plugin {
 			Games.addBits(500, username); // eslint-disable-line no-use-before-define
 		});
 	}
+
+	follows(mon, paramList) {
+		let stuff = data[mon]["stuff"];
+		for (let i = 0; i < paramList.length; i++) {
+			if (stuff.indexOf(paramList[i]) === -1) return false;
+		}
+		return true;
+	}
+	solveParam(numParams, mons, user) {
+		let monsList = mons.split(", ");
+		let sharedParams = [];
+		let firstParams = data[monsList[0]]["stuff"];
+		console.log("First mon is " + monsList[0]);
+		for (let i = 0; i < firstParams.length; i++) {
+			let bad = false;
+			for (let j = 1; j < monsList.length; j++) {
+				if (data[monsList[j]]["stuff"].indexOf(firstParams[i]) === -1) {
+					console.log(firstParams[i] + " " + monsList[j]);
+					bad = true;
+					break;
+				}
+			}
+			if (!bad) {
+				sharedParams.push(firstParams[i]);
+			}
+		}
+		console.log(sharedParams);
+		if (numParams === 2) {
+			for (let i = 0; i < sharedParams.length; i++) {
+				for (let j = i + 1; j < sharedParams.length; j++) {
+					let paramsList = [sharedParams[i], sharedParams[j]];
+					let found = false;
+					for (let mon in data) {
+						if (this.follows(mon, paramsList) && monsList.indexOf(mon) === -1) {
+							let dexEntry = Tools.data.pokedex[Tools.toId(mon)];
+							if (dexEntry.baseSpecies) {
+								let otherName = dexEntry.baseSpecies;
+								if (this.follows(otherName, paramsList) && monsList.indexOf(otherName) === -1) {
+									found = true;
+								}
+							} else {
+								found = true;
+							}
+							if (found) break;
+						}
+					}
+					if (!found) {
+						user.say("A possible set of params is " + paramsList.join(", "));
+						return;
+					}
+				}
+			}
+		} else if (numParams === 3) {
+			for (let i = 0; i < sharedParams.length; i++) {
+				for (let j = i + 1; j < sharedParams.length; j++) {
+					for (let k = j + 1; k < sharedParams.length; k++) {
+						let paramsList = [sharedParams[i], sharedParams[j], sharedParams[k]];
+						let found = false;
+						for (let mon in data) {
+							if (this.follows(mon, paramsList) && monsList.indexOf(mon) === -1) {
+								let dexEntry = Tools.data.pokedex[Tools.toId(mon)];
+								if (dexEntry.baseSpecies) {
+									let otherName = dexEntry.baseSpecies;
+									if (this.follows(otherName, paramsList) && monsList.indexOf(otherName) === -1) {
+										found = true;
+									}
+								} else {
+									found = true;
+								}
+								if (found) break;
+							}
+						}
+						if (!found) {
+							console.log(i + " " + j + " " + k);
+							user.say("A possible set of params is " + paramsList.join(", "));
+							return;
+						}
+					}
+				}
+			}
+		} else if (numParams === 4) {
+			for (let i = 0; i < sharedParams.length; i++) {
+				for (let j = i + 1; j < sharedParams.length; j++) {
+					for (let k = j + 1; k < sharedParams.length; k++) {
+						for (let l = k + 1; l < sharedParams.length; l++) {
+							let paramsList = [sharedParams[i], sharedParams[j], sharedParams[k], sharedParams[l]];
+							let found = false;
+							for (let mon in data) {
+								if (this.follows(mon, paramsList) && monsList.indexOf(mon) === -1) {
+									let dexEntry = Tools.data.pokedex[Tools.toId(mon)];
+									if (dexEntry.baseSpecies) {
+										let otherName = dexEntry.baseSpecies;
+										if (this.follows(otherName, paramsList) && monsList.indexOf(otherName) === -1) {
+											found = true;
+										}
+									} else {
+										found = true;
+									}
+									if (found) break;
+								}
+							}
+							if (!found) {
+								console.log(i + " " + j + " " + k);
+								user.say("A possible set of params is " + paramsList.join(", "));
+								return;
+							}
+						}
+					}
+				}
+			}
+		}
+		console.log("done");
+		user.say("I couldn't find an answer for your param rip.");
+	}
 }
 
 let Games = new Plugin();
@@ -352,18 +536,43 @@ let commands = {
 		if ((!user.isDeveloper() && !user.hasRank(room, '+')) || !room.game) return;
 		if (typeof room.game.start === 'function') room.game.start();
 	},
+
+	pastgames: function (target, room, user) {
+		if (!user.hasRank(room, '+')) return;
+		if (room.name in Games.pastGames) {
+			let curGames = Games.pastGames[room.name];
+			curGames.reverse();
+			room.say("**[Recent games]** " + curGames.join(", "));
+		}
+	},
 	endgame: 'end',
 	end: function (target, room, user) {
-		if ((!user.isDeveloper() && !user.hasRank(room, '+')) || !room.game) return;
-		room.game.forceEnd();
+		if (!user.isDeveloper() && !user.hasRank(room, '+')) return;
+		if (!room.game) {
+			if (!room.canVote) return;
+			room.say("Voting was ended.");
+			room.canVote = false;
+			clearTimeout(room.timeout);
+		} else {
+			room.game.forceEnd();
+		}
 	},
 
+	solveparam: 'sp',
+	sp: function (target, room, user) {
+		if (!user.isDeveloper() || room !== user) return;
+		let stuff = target.split('|');
+		let spaceIndex = stuff[0].indexOf(" ");
+		let paramNum = Math.floor(stuff[0].substr(0, spaceIndex));
+		Games.solveParam(paramNum, stuff[1].trim(), user);
+	},
 	players: 'pl',
 	pl: function (target, room, user) {
 		if ((!user.isDeveloper() && !user.hasRank(room, '+')) || !room.game) return;
 		if (typeof room.game.pl === 'function') room.game.pl();
 	},
-
+	pg: 'g',
+	pokemonguess: 'g',
 	guess: 'g',
 	g: function (target, room, user) {
 		if (!room.game) return;
