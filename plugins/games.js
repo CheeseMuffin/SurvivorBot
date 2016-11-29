@@ -427,6 +427,7 @@ class Plugin {
 				sharedParams.push(firstParams[i]);
 			}
 		}
+		console.log(sharedParams);
 		if (numParams === 2) {
 			for (let i = 0; i < sharedParams.length; i++) {
 				for (let j = i + 1; j < sharedParams.length; j++) {
@@ -636,7 +637,7 @@ let commands = {
 
 	count: function (target, room, user) {
 		if (!room.game) {
-			if (!user.hasRank(room, '+') || Tools.toId(target) !== "start") {
+			if ((!user.hasRank(room, '+') && room !== user) || Tools.toId(target) !== "start") {
 				return;
 			}
 			Games.createMiniGame("count", room);
