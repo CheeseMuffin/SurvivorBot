@@ -21,7 +21,6 @@ class Room {
 	vote(gameName, user) {
 		let realName;
 		for (let realGame in Games.aliases) {
-			//console.log(realGame);
 			if (Tools.toId(realGame) === Tools.toId(gameName)) {
 				realName = realGame;
 			} else {
@@ -45,7 +44,6 @@ class Room {
 				return;
 			}
 			let blah = this.votes.get(user);
-			console.log(user.name + " suggested " + blah);
 			if (Games.pastGames[this.name] && Games.pastGames[this.name].indexOf(realName) !== -1) {
 				user.say(realName + " is on the past games list and cannot be voted for. Please choose something else!");
 				return;
@@ -81,7 +79,6 @@ class Room {
 		} else {
 			Games.pastGames[this.name] = [games[0]];
 		}
-		console.log(Tools.toId(games[0]));
 		this.game = new Games.games[Tools.toId(games[0])].game(this); // eslint-disable-line new-cap
 		this.game.signups();
 	}
@@ -123,7 +120,6 @@ class Room {
 	say(message) {
 		if (!message) return;
 		if (message.charAt(0) !== '!') message = Tools.normalizeMessage(message);
-		//console.log("I'm saying " + message + " in room " + this.id + "!");
 		Client.send(this.clientId + '|' + message);
 		Client.send(this.clientId + '|' + '/asdf');
 	}
@@ -183,10 +179,8 @@ class Room {
 
 		case 'updatechallenges':
 			stuff = JSON.parse(splitMessage[0]);
-			console.log(stuff.challengesFrom);
 			let name = Object.keys(stuff.challengesFrom)[0];
 			let format = stuff.challengesFrom[name];
-			console.log(format + " " + name);
 			if (format === 'challengecup1v1') {
 				Users.add(name).say("/accept");
 			}
@@ -196,7 +190,6 @@ class Room {
 			Battles.handleRequest(stuff, this); // eslint-disable-line no-undef
 			break;
 		case 'turn':
-			console.log("hi");
 			stuff = JSON.parse(splitMessage[0]);
 			Battles.move(this, stuff); // eslint-disable-line no-undef
 			break;

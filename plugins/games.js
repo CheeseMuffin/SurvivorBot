@@ -621,7 +621,20 @@ let commands = {
 		if (room.game) return;
 		if (!room.canVote) {
 			if (!user.hasRank(room, '+')) return;
-			room.say("Vote for the next game with ``" + Config.commandCharacter + "vote [game]!``");
+			let goodGames = [];
+			for (let fileID in Games.games) {
+				let game = Games.games[fileID];
+				if (!(Games.pastGames[room.name] && Games.pastGames[room.name].indexOf(game.name) !== -1) && !game.minigame && game.name !== "Pikachu's Pool Party" && game.name !== "PokeWars") {
+					console.log(game.name);
+					goodGames.push(game.name);
+				}
+			}
+			goodGames = Tools.shuffle(goodGames);
+			let realGoodGames = [];
+			for (let i = 0; i < 3; i++) {
+				realGoodGames.push(goodGames[i]);
+			}
+			room.say("Vote for the next game with ``" + Config.commandCharacter + "vote [game]!`` Chuffin suggests: " + realGoodGames.join(", "));
 			room.votes = new Map();
 			room.canVote = true;
 			room.timeout = setTimeout(() => room.doGame(), 30 * 1000);
@@ -761,9 +774,9 @@ let commands = {
 		Games.createMiniGame("mashup", room);
 	},
 
-	forcejoin: function (target, room, user) {
+	say: function (target, room, user) {
 		if (!user.isDeveloper()) return;
-		room.say(Config.commandCharacter + "join");
+		room.say(target);
 	},
 
 	forceguess: function (target, room, user) {

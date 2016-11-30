@@ -68,7 +68,13 @@ class Tools {
 		text = this.toString(text);
 		if (!text) return '';
 		text = text.trim();
-		if (text.length > 300) text = text.substr(0, 297) + "...";
+		if (text.length > 300) {
+			if (text.substr(text.length - 2, 2) === "__") {
+				text = text.substr(0, 295) + "__...";
+			} else {
+				text = text.substr(0, 297) + "...";
+			}
+		}
 		return text;
 	}
 
