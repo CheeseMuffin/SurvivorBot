@@ -10,11 +10,11 @@ const colors = {
 	"$": "71FF00",
 };
 const cards = {
-	"galladesfocuspunch": {name: "Gallade's Focus Punch", cost: 600, canTarget: true, effect: {duration: 1, coin: -200, spaces: -4}},
-	"mismagiusscurse": {name: "Mismagius's Curse", cost: 600, canTarget: true, effect: {duration: 1, rollMax: 3}},
-	"tentacruelstoxicspikes": {name: "Tentacruel's Toxic Spikes", cost: 300, targetSquare: true, effect: {duration:2, rollCut: 2}},
-	"pinecosspikes": {name: "Pineco's Spikes", cost: 200, targetSquare: true, effect: {duration: 1, rollMax: 4}},
-	"accelgorsagility": {name: "Accelgor's Agility", cost: 300, effect: {duration: 1, rollCut: -2}},
+	"galladesfocuspunch": {aliases: ["gfp"], name: "Gallade's Focus Punch", cost: 600, canTarget: true, effect: {duration: 1, coin: -200, spaces: -4}},
+	"mismagiusscurse": {aliases: ["mc"], name: "Mismagius's Curse", cost: 600, canTarget: true, effect: {duration: 1, rollMax: 3}},
+	"tentacruelstoxicspikes": {aliases: ["tts"], name: "Tentacruel's Toxic Spikes", cost: 300, targetSquare: true, effect: {duration:2, rollCut: 2}},
+	"pinecosspikes": {aliases: ["ps"], name: "Pineco's Spikes", cost: 200, targetSquare: true, effect: {duration: 1, rollMax: 4}},
+	"accelgorsagility": {aliases: ["aa"], name: "Accelgor's Agility", cost: 300, effect: {duration: 1, rollCut: -2}},
 };
 
 const data = {
@@ -72,7 +72,7 @@ class Pikachu extends Games.Game {
 		this.map = [];
 		this.timerPerAction = 30;
 		this.numGoodSquares = 2 * (this.numRows + this.numCols) - 4;
-		this.games = ["Anagrams", "Inverse Lost Letters"];
+		this.games = ["Anagrams", "Inverse Lost Letters", "Piplup's Letter Placements", "Mashups", "Lost Letters"];
 		let arr = [];
 		for (let i = 0; i < this.numGoodSquares; i++) {
 			arr.push(i);
@@ -90,7 +90,7 @@ class Pikachu extends Games.Game {
 					if (arr.indexOf(cur) !== -1) {
 						addstr = "$";
 					} else {
-						if (Math.random() < 0.4) {
+						if (Math.random() < 1) {
 							addstr = "o";
 						} else {
 							addstr = "x";
@@ -100,9 +100,7 @@ class Pikachu extends Games.Game {
 				}
 				this.map[i].push(addstr);
 			}
-			//console.log(this.map[i]);
 		}
-		//console.log(this.map);
 	}
 
 	displayBoard() {
@@ -130,7 +128,6 @@ class Pikachu extends Games.Game {
 		}
 		str += strs.join("");
 		str += "</table><table align=\"center\" border=\"2\"><tr><td style=background-color:#71FF00; width=\"20px\"; height=\"20px\"; float: left;></td><td>Shop</td></tr><tr><td style=background-color:#CC4314; width=\"20px\"; height=\"20px\"; float: left;></td><td>Card</td></tr><tr><td style=background-color:#0029FF; width=\"20px\"; height=\"20px\"; float: left;></td><td>Empty</td></tr><tr><td style=background-color:#000000; width=\"20px\"; height=\"20px\"; float: left;></td><td>Starting Position</td></tr></table></body></html></div>";
-		//console.log(str);
 		this.say("!htmlbox " + str);
 	}
 
@@ -173,6 +170,7 @@ class Pikachu extends Games.Game {
 		}
 	}
 	nextPlayer() {
+		this.items = [];
 		if (this.canShop) {
 			this.say(this.curPlayer.name + " decided to skip the shop.");
 			this.canShop = false;
@@ -243,12 +241,9 @@ class Pikachu extends Games.Game {
 			}
 		}
 		let beginstr = (this.curPlayer.name + " rolled a " + curMax + "-sided die and rolled a " + roll + "!");
-		console.log(curSpace[0] + " " + curSpace[1] + " " + this.map[curSpace[0]][curSpace[1]]);
 		if (this.map[curSpace[0]][curSpace[1]] === 'o') {
 			let cardIndex = Math.floor(Math.random() * Object.keys(cards).length);
-			//console.log(cardIndex);
 			let card = cards[Object.keys(cards)[cardIndex]];
-			//console.log(Object.keys(cards));
 			this.say(beginstr + " They landed on a card space and drew a " + card.name + "!");
 			if (trapLand) {
 				this.say("They also landed on a trap card of " + badCard.effects);
@@ -257,6 +252,7 @@ class Pikachu extends Games.Game {
 			let curCards = this.cards.get(this.curPlayer);
 			curCards.push(card);
 			this.cards.set(this.curPlayer, curCards);
+			this.hand("", Users.get(this.curPlayer.name));
 			this.nextPlayer();
 		} else if (this.map[curSpace[0]][curSpace[1]] === '$') {
 			this.say(beginstr + " They landed on a shop. Would they like to go in? (``" + Config.commandCharacter + "no`` or ``" + Config.commandCharacter + "yes``)");
@@ -270,7 +266,6 @@ class Pikachu extends Games.Game {
 			}
 			this.nextPlayer();
 		}
-		console.log("curspace: " + curSpace);
 	}
 
 	roll(target, user) {
@@ -285,7 +280,15 @@ class Pikachu extends Games.Game {
 		let player = this.players[user.id];
 		if (!player || !this.curPlayer || player.id !== this.curPlayer.id) return;
 		let playList = target.split(",");
-		let card = cards[Tools.toId(playList[0])];
+		//let card = cards[Tools.toId(playList[0])];
+		let card = null;
+		for (let cardName in cards) {
+			let curCard = cards[cardName];
+			if (cardName === Tools.toId(playList[0]) || curCard.aliases.indexOf(Tools.toId(playList[0])) !== -1) {
+				card = curCard;
+				break;
+			}
+		}
 		if (!card) {
 			this.say("That is not a valid card!");
 			return;
@@ -300,8 +303,6 @@ class Pikachu extends Games.Game {
 			this.say("You don't have that card!");
 			return;
 		}
-		curCards.splice(i, 1);
-		this.cards.set(player, curCards);
 		if (card.canTarget) {
 			if (playList.length === 1) {
 				this.say("Usage: ``" + Config.commandCharacter + "play " + card.name + ", [username]``");
@@ -322,7 +323,7 @@ class Pikachu extends Games.Game {
 				let letters = "abcdefghij";
 				let x = letters.indexOf(Tools.toId(playList[1]));
 				let y = Math.floor(Tools.toId(playList[2])) - 1;
-				if ((x !== 0 && x !== (this.numRows - 1)) || (y !== 0 || y !== (this.numCols - 1))) {
+				if ((x !== 0 && x !== (this.numRows - 1)) && (y !== 0 && y !== (this.numCols - 1))) {
 					this.say("That square is not on the edge of the grid!");
 					return;
 				} else {
@@ -334,6 +335,8 @@ class Pikachu extends Games.Game {
 			this.say("You have used a movement card!");
 			this.effects.set(player, card.effects);
 		}
+		curCards.splice(i, 1);
+		this.cards.set(player, curCards);
 	}
 
 	doGame() {
@@ -357,6 +360,27 @@ class Pikachu extends Games.Game {
 			}
 		}
 		return newstr;
+	}
+
+	llconvert(str) {
+		let newstr = "";
+		str = Tools.toId(str);
+		for (let i = 0; i < str.length; i++) {
+			if (!this.isVowel(str.charAt(i))) {
+				newstr += str.charAt(i);
+			}
+		}
+		return newstr;
+	}
+
+	isGood(cur) {
+		cur = Tools.toId(cur);
+		for (let i = 0; i < cur.length; i++) {
+			if (cur.substr(i, 3) === this.curAnswer) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	nextQuestion() {
@@ -388,19 +412,79 @@ class Pikachu extends Games.Game {
 			}
 			this.say("**[" + this.category + "]**: __" + answer + "__");
 			this.timeout = setTimeout(() => this.nextQuestion(), 20 * 1000);
+		} else if (this.game === "Piplup's Letter Placements") {
+			this.maxPoints = 5;
+			this.answers = [];
+			this.category = this.categories[Math.floor(Math.random() * this.categories.length)];
+			let curThing = Tools.toId(data[this.category][Math.floor(Math.random() * data[this.category].length)]);
+			let curLetter = Math.floor(Math.random() * (curThing.length - 2));
+			this.curAnswer = curThing.substr(curLetter, 3);
+			for (let i = 0; i < data[this.category].length; i++) {
+				let cur = data[this.category][i];
+				if (this.isGood(cur)) this.answers.push(cur);
+			}
+			this.say("Find a **" + this.category + "** with the letters **" + this.curAnswer.toUpperCase() + "** in order!");
+			this.timeout = setTimeout(() => this.nextQuestion(), 15 * 1000);
+		} else if (this.game === "Mashups") {
+			this.maxPoints = 5;
+			let newDat = Tools.shuffle(data["Pokemon"]);
+			this.answers = [newDat[0], newDat[1]];
+			let mon1 = newDat[0];
+			let mon2 = newDat[1];
+			let index1 = 0, index2 = 0, str = "";
+			while (index1 < mon1.length && index2 < mon2.length) {
+				if (Math.random() < 0.5) {
+					str += mon1[index1];
+					index1++;
+				} else {
+					str += mon2[index2];
+					index2++;
+				}
+			}
+			while (index1 < mon1.length) {
+				str += mon1[index1];
+				index1++;
+			}
+			while (index2 < mon2.length) {
+				str += mon2[index2];
+				index2++;
+			}
+			this.room.say("**" + Tools.toId(str) + "**");
+			this.timeout = setTimeout(() => this.nextQuestion(), 10 * 1000);
+		} else if (this.game === "Lost Letters") {
+			this.maxPoints = 5;
+			this.category = this.categories[Math.floor(Math.random() * this.categories.length)];
+			let x = Math.floor(Math.random() * data[this.category].length);
+			let answer = this.llconvert(data[this.category][x]);
+			this.answers = [];
+			for (let i = 0; i < data[this.category].length; i++) {
+				if (this.llconvert(data[this.category][i]) === answer) {
+					this.answers.push(data[this.category][i]);
+				}
+			}
+			this.say("**[" + this.category + "]**: __" + answer + "__");
+			this.timeout = setTimeout(() => this.nextQuestion(), 20 * 1000);
 		}
 	}
 
 	guess(guess, user) {
 		if (!this.answers) return;
-		guess = Tools.toId(guess);
 		let player = this.players[user.id];
 		if (!player) return;
 		let correct = false;
-		for (let i = 0, len = this.answers.length; i < len; i++) {
-			if (Tools.toId(this.answers[i]) === guess) {
-				correct = true;
-				break;
+		if (this.game === "Mashups") {
+			let commaIndex = guess.indexOf(",");
+			if (commaIndex === -1) return false;
+			let mon1 = Tools.toId(guess.substr(0, commaIndex));
+			let mon2 = Tools.toId(guess.substr(commaIndex + 1));
+			if ((mon1 === Tools.toId(this.answers[0]) && mon2 === Tools.toId(this.answers[1])) || (mon1 === Tools.toId(this.answers[1]) && mon2 === Tools.toId(this.answers[0]))) correct = true;
+		} else {
+			guess = Tools.toId(guess);
+			for (let i = 0, len = this.answers.length; i < len; i++) {
+				if (Tools.toId(this.answers[i]) === guess) {
+					correct = true;
+					break;
+				}
 			}
 		}
 		if (!correct) return;
@@ -476,7 +560,14 @@ class Pikachu extends Games.Game {
 	buy(target, user) {
 		target = Tools.toId(target);
 		let player = this.players[user.id];
-		let card = cards[target];
+		let card = null;
+		for (let cardName in cards) {
+			let curCard = cards[cardName];
+			if (cardName === Tools.toId(target) || curCard.aliases.indexOf(Tools.toId(target)) !== -1) {
+				card = curCard;
+				break;
+			}
+		}
 		if (!card || !player || !this.curPlayer || player.id !== this.curPlayer.id || !this.canBuy) return;
 		let coins = this.coins.get(player);
 		if (coins < card.cost) {
