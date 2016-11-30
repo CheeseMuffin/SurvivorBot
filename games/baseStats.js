@@ -1,7 +1,7 @@
 'use strict';
 
 const name = "Pupitar's Power Placement";
-const description = "Guess a pokemon with the base stats given! **Command:** ``" + Config.commandCharacter + "g [answer]``";
+const description = "Guess a move with base power as close as possible to the given base power! **Command:** ``" + Config.commandCharacter + "g [answer]``";
 const id = Tools.toId(name);
 const data = {};
 const goodBP = [];
@@ -92,4 +92,4 @@ exports.name = name;
 exports.id = id;
 exports.description = description;
 exports.game = Pupitars;
-exports.aliases = [];
+exports.aliases = ["pupitars"];

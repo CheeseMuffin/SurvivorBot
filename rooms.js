@@ -70,6 +70,7 @@ class Room {
 				games.push(key);
 			}
 		}
+		games = Tools.shuffle(games);
 		if (this.name in Games.pastGames) {
 			let cur = Games.pastGames[this.name];
 			cur.push(games[0]);
@@ -80,7 +81,6 @@ class Room {
 		} else {
 			Games.pastGames[this.name] = [games[0]];
 		}
-		games = Tools.shuffle(games);
 		console.log(Tools.toId(games[0]));
 		this.game = new Games.games[Tools.toId(games[0])].game(this); // eslint-disable-line new-cap
 		this.game.signups();

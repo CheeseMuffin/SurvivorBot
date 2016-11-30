@@ -1,6 +1,6 @@
 'use strict';
 
-const name = "Inverse Lost Letters!";
+const name = "Inverse Lost Letters";
 const id = Tools.toId(name);
 const description = "Players guess the missing letters to find the answers! **Command:** ``" + Config.commandCharacter + "g [answer]``";
 
