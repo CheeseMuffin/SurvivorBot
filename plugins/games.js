@@ -90,6 +90,8 @@ class Game {
 		this.freeJoin = false;
 		this.playerCap = -1;
 		this.minigame = false;
+		this.canLateJoin = false;
+		this.canRejoin = false;
 	}
 
 	say(message) {
@@ -215,13 +217,22 @@ class Game {
 	}
 
 	join(user) {
-		if (user.id in this.players || this.started) return;
+		if (this.started && !this.canLateJoin) return;
+		if (user.id in this.players && !this.canRejoin) return;
 		if (this.freeJoin) {
 			user.say("This game does not require you to join!");
 			return;
 		}
-		this.addPlayer(user);
-		user.say('You have joined the game of ' + this.name + '!');
+		if (user.id in this.players) {
+			let player = this.players[user.id];
+			if (!player.eliminated) return;
+			user.say("You have rejoined the game of " + this.name + "!");
+			player.eliminated = false;
+			this.players[user.id] = player;
+		} else {
+			this.addPlayer(user);
+			user.say('You have joined the game of ' + this.name + '!');
+		}	
 		if (typeof this.onJoin === 'function') this.onJoin(user);
 	}
 
@@ -390,7 +401,7 @@ class Plugin {
 				if (Tools.toId(key) === Tools.toId(username)) {
 					stuff = data[key];
 					if (stuff.indexOf(chieveName) !== -1) return;
-					stuff.add(chieveName);
+					stuff.push(chieveName);
 					data[key] = stuff;
 					break;
 				}
@@ -557,6 +568,126 @@ let commands = {
 		let paramNum = Math.floor(stuff[0].substr(0, spaceIndex));
 		Games.solveParam(paramNum, stuff[1].trim(), user);
 	},
+	
+	solveport: function (target, room, user) {
+		if (!user.isDeveloper() || room !== user) return;
+		let ports = target.split("]");
+		let realPorts = [];
+		for (let i = 0; i < ports.length; i++) {
+			realPorts.push(ports[i].split(" "));
+		}
+		let actualPorts = [];
+		for (let i = 0; i < realPorts.length; i++) {
+			actualPorts.push([]);
+			for (let j = 0; j < realPorts[i].length; j++) {
+				let cur = realPorts[i][j];
+				if (cur !== "") {
+					actualPorts[i].push(Tools.toId(cur));
+				}
+			}
+			if (actualPorts[i].length === 0) {
+				actualPorts.splice(i,1);
+			}
+		}
+		let satisfyingList = [];
+		for (let i = 0; i< actualPorts.length; i++) {
+			satisfyingList.push([]);
+			if (actualPorts[i].length === 3) {
+				if (actualPorts[i][2] === 'pokemon') {
+					for (let monName in Tools.data.pokedex) {
+						let mon = Tools.data.pokedex[monName];
+						if (mon.baseSpecies || mon.num < 0) continue;
+						if (actualPorts[i][0] === 'gen') {
+							if (Tools.generation(mon.num) === Math.floor(actualPorts[i][1])) {
+								satisfyingList[i].push(monName);
+							}
+						}
+						else if (actualPorts[i][1] === 'type') {
+							let found = false;
+							for (let k = 0; k < mon.types.length; k++) {
+								if (Tools.toId(mon.types[k]) === actualPorts[i][0]) {
+									found = true;
+									break;
+								}
+							}
+							if (found) satisfyingList[i].push(monName);
+						}
+					}	
+				}
+				else {
+					console.log("in here");
+					for (let moveName in Tools.data.moves) {
+						let move = Tools.data.moves[moveName];
+						if (Tools.toId(move.type) === actualPorts[i][0]) {
+							satisfyingList[i].push(moveName);
+						}
+					}
+				}
+			}
+			else {
+				for (let monName in Tools.data.pokedex) {
+					let mon = Tools.data.pokedex[monName];
+					if (mon.baseSpecies || mon.num < 0) continue;
+					if (Tools.toId(mon.color) === actualPorts[i][0]) {
+						satisfyingList[i].push(monName);
+					}
+				}
+			}
+		}
+		console.log(satisfyingList);
+		if (satisfyingList.length === 2) {
+			for (let i = 0; i < satisfyingList[0].length; i++) {
+				for (let j = 0; j < satisfyingList[1].length; j++) {
+					let t1 = satisfyingList[0][i], t2 = satisfyingList[1][j];
+					let ans = Tools.isPort(t1, t2)
+					if (Tools.isPort(t1, t2)) {
+						user.say("A possible answer is " + ans);
+						return;
+					}
+				}
+			}
+			user.say("I couldn't find an answer for your port rip.");
+		} else if (satisfyingList.length === 3) {
+			for (let i = 0; i < satisfyingList[0].length; i++) {
+				for (let j = 0; j < satisfyingList[1].length; j++) {
+					let t1 = satisfyingList[0][i], t2 = satisfyingList[1][j];
+					let ans1 = Tools.isPort(t1, t2);
+					if (ans1) {
+						for (let k = 0; k < satisfyingList[2].length; k++) {
+							let t3 = satisfyingList[2][k];
+							let ans2 = Tools.isPort(ans1, t3);
+							if (ans2) {
+								user.say("A possible answer is " + ans2);
+								return;
+							}
+						}
+					}
+				}
+			}
+		} else if (satisfyingList.length === 4) {
+			for (let i = 0; i < satisfyingList[0].length; i++) {
+				for (let j = 0; j < satisfyingList[1].length; j++) {
+					let t1 = satisfyingList[0][i], t2 = satisfyingList[1][j];
+					let ans1 = Tools.isPort(t1, t2);
+					if (ans1) {
+						for (let k = 0; k < satisfyingList[2].length; k++) {
+							let t3 = satisfyingList[2][k];
+							let ans2 = Tools.isPort(ans1, t3);
+							if (ans2) {
+								for (let l = 0; l < satisfyingList[3].length; l++) {
+									let t4 = satisfyingList[3][l];
+									let ans3 = Tools.isPort(ans2, t4);
+									if (ans3) {
+										user.say("A possible answer is " + ans3);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
 	players: 'pl',
 	pl: function (target, room, user) {
 		if ((!user.isDeveloper() && !user.hasRank(room, '+')) || !room.game) return;
@@ -570,6 +701,7 @@ let commands = {
 		if (typeof room.game.guess === 'function') room.game.guess(target, user);
 	},
 
+	r: 'roll',
 	roll: function (target, room, user) {
 		if (!room.game) return;
 		if (typeof room.game.roll === 'function') room.game.roll(target, user);
@@ -675,7 +807,12 @@ let commands = {
 
 	coins: function (target, room, user) {
 		if (!room.game) return;
-		if (typeof room.game.coins === 'function') room.game.coins(user);
+		if (typeof room.game.getCoins === 'function') room.game.getCoins(user);
+	},
+	
+	stars: function (target, room, user) {
+		if (!room.game) return;
+		if (typeof room.game.getStars === 'function') room.game.getStars(user);
 	},
 
 	exclude: function (target, room, user) {
@@ -894,6 +1031,11 @@ let commands = {
 				room.say("Please enter a valid achievement.");
 			}
 		});
+	},
+	
+	say: function (target, room, user) {
+		if (!user.isDeveloper()) return;
+		room.say(target);
 	},
 
 	chieves: function (target, room, user) {
