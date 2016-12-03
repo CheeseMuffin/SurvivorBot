@@ -67,13 +67,15 @@ class HangmanBomb extends Games.Game {
 		let player = this.players[user.id];
 		this.points.delete(player);
 		this.curGuesses.delete(player);
-		if (this.numPlayers() === 1 && this.started) {
+		if (this.getRemainingPlayerCount() === 1 && this.started) {
 			if (this.answer) {
 				this.say("The correct answer was: __" + this.answer + "__");
 			}
-			let winPlayer = this.remainingPlayer();
+			let playersLeft = this.getRemainingPlayers();
+			let winPlayer = playersLeft[Object.keys(playersLeft)[0]];
 			this.say("**Winner:** " + winPlayer.name);
-			this.winUser(500, winPlayer);
+			Storage.addPoints(500, winPlayer, this.room.id);
+			clearTimeout(this.timeout);
 			this.end();
 			return;
 		}
@@ -130,14 +132,15 @@ class HangmanBomb extends Games.Game {
 		} else {
 			this.letterRound++;
 		}
-		let numPlayers = this.numPlayers();
+		let numPlayers = this.getRemainingPlayerCount();
 		if (numPlayers === 0) {
 			this.say("The correct answer was: __" + realAnswer + "__");
 			this.say("No winners this game! Better luck next time!");
 			this.end();
 			return;
 		} else if (numPlayers === 1) {
-			let winPlayer = this.remainingPlayer();
+			let playersLeft = this.getRemainingPlayers();
+			let winPlayer = playersLeft[Object.keys(playersLeft)[0]];
 			this.say("The correct answer was: __" + realAnswer + "__");
 			this.say("**Winner:** " + winPlayer.name);
 			this.winUser(500, winPlayer);

@@ -157,8 +157,7 @@ class Excluded extends Games.Game {
 				Games.addChieves("Hax", user.name);
 			}
 			clearTimeout(this.timeout);
-			this.winUser(500, player);
-			this.timeout = null;
+			Storage.addPoints(500, player, this.room.id);
 			this.end();
 			return;
 		} else {

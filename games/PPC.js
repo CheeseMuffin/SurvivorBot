@@ -23,7 +23,6 @@ function isPort(mon1, mon2) {
 	return false;
 }
 
-//console.log(isPort("corsola", "lapras"));
 for (let i in Tools.data.pokedex) {
 	let mon1 = Tools.data.pokedex[i];
 	if (!mon1.species || mon1.num < 1) continue;
@@ -73,7 +72,6 @@ class PPC extends Games.Game {
 		let found = true;
 		while (found) {
 			this.curMon = Object.keys(data)[Math.floor(Math.random() * Object.keys(data).length)];
-			console.log(this.curMon);
 			if (this.valid()) found = false;
 		}
 	}
@@ -81,6 +79,7 @@ class PPC extends Games.Game {
 	onNextRound() {
 		if (this.playerCount === 1) {
 			this.say("**Winner:** " + this.players[Object.keys(this.players)[0]].name);
+			Storage.addPoints(500, this.players[Object.keys(this.players)[0]], this.room.id);
 			this.winUser(500, this.players[Object.keys(this.players)[0]]);
 			this.end();
 			return;
@@ -119,8 +118,6 @@ class PPC extends Games.Game {
 			this.curPlayer = this.players[userID];
 			this.order.splice(0, 1);
 			this.guessed = false;
-			console.log(data[this.curMon]);
-			console.log(this.curUsed);
 			if (!this.valid()) {
 				this.chooseMon();
 				this.say("No mons left! **" + this.curPlayer.name + "** you're up! The Politoed randomly chose " + this.curMon);

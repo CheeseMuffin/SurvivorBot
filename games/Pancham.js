@@ -82,7 +82,7 @@ class Pancham extends Games.Game {
 			if (this.chieves) {
 				Games.addChieve("Pair Mania", this.players[Object.keys(this.players)[0]].name);
 			}
-			this.winUser(500, this.players[Object.keys(this.players)[0]]);
+			Storage.addPoints(500, this.players[Object.keys(this.players)[0]], this.room.id);
 			this.end();
 			return;
 		} else if (this.playerCount === 0) {

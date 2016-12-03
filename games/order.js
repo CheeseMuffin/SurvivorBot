@@ -92,7 +92,7 @@ class Orders extends Games.Game {
 			if (this.round === this.maxPoints) {
 				Games.addChieve("In Order", user.name);
 			}
-			this.winUser(500, player);
+			Storage.addPoints(500, player, this.room.id);
 			this.end();
 			return;
 		}

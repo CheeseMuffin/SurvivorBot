@@ -107,7 +107,7 @@ class IL extends Games.Minigame {
 		clearTimeout(this.timeout);
 		console.log(this.timeout);
 		this.say("Correct! " + user.name + " has guessed an answer!");
-		this.winUser(25, user);
+		Storage.addPoints(25, user, this.room.id);
 		this.end();
 		return;
 	}

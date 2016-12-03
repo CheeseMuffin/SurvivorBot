@@ -78,6 +78,11 @@ class Tools {
 		return text;
 	}
 
+	random(limit) {
+		if (!limit) limit = 2;
+		return Math.floor(Math.random() * limit);
+	}
+
 	shuffle(array) {
 		let currentIndex = array.length, temporaryValue, randomIndex;
 		while (0 !== currentIndex) {
@@ -88,6 +93,19 @@ class Tools {
 			array[randomIndex] = temporaryValue;
 		}
 		return array;
+	}
+
+	sample(array, amount) {
+		if (!(array instanceof Array)) return;
+		let len = array.length;
+		if (!len) return;
+		if (len === 1 || !amount || amount === 1) return array.slice()[Math.floor(Math.random() * len)];
+		if (amount > len) {
+			amount = len;
+		} else if (amount < 0) {
+			amount = 0;
+		}
+		return this.shuffle(array).splice(0, amount);
 	}
 
 	generation(num) {
@@ -134,6 +152,14 @@ class Tools {
 		} else {
 			return "th";
 		}
+	}
+	isPort(mon1, mon2) {
+		for (let i = 2; i < Math.min(mon1.length, mon2.length, 5); i++) {
+			if (mon1.slice(mon1.length - i) === mon2.slice(0, i)) {
+				return (mon1.slice(0, mon1.length - i) + mon2);
+			}
+		}
+		return false;
 	}
 }
 
