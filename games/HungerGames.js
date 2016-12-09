@@ -26,13 +26,15 @@ class HG extends Games.Game {
 		this.oplayer = null;
 		this.rolla = null;
 		this.rollb = null;
-		if (this.playerCount === 1) {
-			this.say("**Winner:** " + this.players[Object.keys(this.players)[0]].name);
+		if (this.getRemainingPlayerCount() === 1) {
+			let winPlayer = this.getLastPlayer();
+			this.say("**Winner:** " + winPlayer.name);
 			this.end();
 			return;
-		} else if (this.playerCount === 2) {
-			this.curPlayer = this.players[Object.keys(this.players)[0]];
-			this.oplayer = this.players[Object.keys(this.players)[1]];
+		} else if (this.getRemainingPlayerCount() === 2) {
+			let playersLeft = this.getRemainingPlayers();
+			this.curPlayer = playersLeft[Object.keys(playersLeft)[0]];
+			this.oplayer = playersLeft[Object.keys(playersLeft)[1]];
 			this.say("Only **" + this.curPlayer.name + "** and **" + this.oplayer.name + "** are left! Moving directly to attacks.");
 			this.timeout = setTimeout(() => this.handleAttack(), 5 * 1000);
 		} else {
@@ -84,12 +86,11 @@ class HG extends Games.Game {
 			if (this.rolla !== this.rollb) {
 				if (this.rolla < this.rollb) {
 					this.say("**" + this.oplayer.name + "** beats up **" + this.curPlayer.name + "**!");
-					delete this.players[this.curPlayer.id];
+					this.players[this.curPlayer.id].eliminated = true;
 				} else if (this.rolla > this.rollb) {
 					this.say("**" + this.curPlayer.name + "** beats up **" + this.oplayer.name + "**!");
-					delete this.players[this.oplayer.id];
+					this.players[this.oplayer.id].eliminated = true;
 				}
-				this.playerCount--;
 				this.timeout = setTimeout(() => this.nextRound(), 10 * 1000);
 			} else {
 				this.say("The rolls were the same! rerolling...");
@@ -113,7 +114,7 @@ class HG extends Games.Game {
 		let otherUser = Users.get(target);
 		if (!otherUser) return;
 		let oplayer = this.players[otherUser.id];
-		if (!oplayer) return;
+		if (!oplayer || oplayer.eliminated) return;
 		if (oplayer.name === this.curPlayer.name) {
 			this.say("Are you really sure you want to attack yourself?");
 			return;

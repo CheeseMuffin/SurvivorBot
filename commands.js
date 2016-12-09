@@ -356,7 +356,7 @@ let commands = {
 	destroy: function (target, room, user) {
 		for (room in Rooms.rooms) {
 			let realRoom = Rooms.rooms[room];
-			if (realRoom.game && typeof realRoom.game.destroy === 'function') realRoom.game.destroy(user, target);
+			if (realRoom.game && typeof realRoom.game.destroy === 'function') realRoom.game.destroy(target, user);
 		}
 	},
 

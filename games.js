@@ -123,7 +123,7 @@ class Game {
 
 	start() {
 		if (this.started) return;
-		if (this.playerCount < 2) {
+		if (this.playerCount < 1) {
 			this.say("The game needs at least two players to start!");
 			return;
 		}
@@ -242,6 +242,21 @@ class Game {
 		return remainingPlayers;
 	}
 
+	getRandomOrdering() {
+		let remainPlayers = this.getRemainingPlayers();
+		let order = Tools.shuffle(Object.keys(remainPlayers));
+		let realOrder = [];
+		for (let i = 0; i < order.length; i++) {
+			realOrder.push(remainPlayers[order[i]]);
+		}
+		return realOrder;
+	}
+
+	getLastPlayer() {
+		let remainingPlayers = this.getRemainingPlayers();
+		return remainingPlayers[Object.keys(remainingPlayers)[0]];
+	}
+
 	getRemainingPlayerCount() {
 		let count = 0;
 		for (let i in this.players) {
@@ -270,8 +285,6 @@ class Game {
 	handlehtml(message) {
 		message = message[0];
 		message = message.substr(21);
-		console.log(message);
-		console.log(message.substr(4, 2));
 		if (message.substr(0, 4) === "Roll") {
 			let colonIndex = message.indexOf(":");
 			message = message.substr(colonIndex + 2);
@@ -304,14 +317,21 @@ class GamesManager {
 		this.games = {};
 		this.aliases = {};
 		this.pastGames = {};
+		this.fileMap = {};
 	}
 
 	onLoad() {
 		this.loadGames();
 	}
 
+	loadGame(fileName) {
+		delete require.cache["C:\\Users\\TEAM VELLOTTI\\Desktop\\Showdown\\Bot Stuff\\Cassius\\games\\" + fileName];
+		let file = require('./games/' + fileName);
+		if (file.game && file.name && file.id) this.games[file.id] = file;
+		this.aliases[file.name] = file.aliases;
+	}
+
 	loadGames() {
-		Object.keys(require.cache).forEach(function (key) { delete require.cache[key]; });
 		let games;
 		try {
 			games = fs.readdirSync('./games');
@@ -320,9 +340,11 @@ class GamesManager {
 		for (let i = 0, len = games.length; i < len; i++) {
 			let file = games[i];
 			if (!file.endsWith('.js')) continue;
+			let fileName = file;
 			file = require('./games/' + file);
 			if (file.game && file.name && file.id) this.games[file.id] = file;
 			this.aliases[file.name] = file.aliases;
+			this.fileMap[file.id] = fileName;
 		}
 	}
 
@@ -358,11 +380,11 @@ class GamesManager {
 		}
 		if (!(id in this.games)) return room.say("The game '" + game.trim() + "' was not found.");
 		if (!this.games[id].minigame) return room.say("Needs to be a minigame!");
+		this.loadGame(this.fileMap[id]);
 		room.game = new this.games[id].game(room); // eslint-disable-line new-cap
 		room.game.signups();
 	}
 	createGame(game, room) {
-		this.loadGames();
 		if (room.canVote) return room.say("Voting is in progress");
 		if (room.game) {
 			if (room.game.minigame) {
@@ -383,6 +405,7 @@ class GamesManager {
 		}
 		if (!(id in this.games)) return room.say("The game '" + game.trim() + "' was not found.");
 		if (this.games[id].minigame) return room.say("You cannot signup a minigame!");
+		this.loadGame(this.fileMap[id]);
 		room.game = new this.games[id].game(room); // eslint-disable-line new-cap
 		if (room.name in this.pastGames) {
 			let cur = this.pastGames[room.name];
