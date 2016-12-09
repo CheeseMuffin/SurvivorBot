@@ -14,6 +14,7 @@ const data = {};
 const monForms = {};
 for (let i in Tools.data.pokedex) {
 	let mon = Tools.data.pokedex[i];
+	if (mon.num < 1) continue;
 	let species = mon.species;
 	data[species] = {};
 	data[species]["stuff"] = [mon.color];
@@ -28,7 +29,13 @@ for (let i in Tools.data.pokedex) {
 			monForms[mon.otherFormes[j]] = species;
 		}
 	}
-	data[species]["stuff"].push(Tools.generation(mon.num));
+	let gen = Tools.generation(mon.num);
+	if (mon.formeLetter === "M") {
+		gen = 6;
+	} else if (mon.formeLetter === "A") {
+		gen = 7;
+	}
+	data[species]["stuff"].push(gen);
 	if (species === "Smeargle") {
 		data[species]["Pokemon Moves"] = [];
 		for (let move in Tools.data.moves) {
@@ -255,12 +262,27 @@ class Game {
 	pl() {
 		let players = [];
 		for (let userID in this.players) {
+			if (this.players[userID].eliminated) continue;
 			players.push(this.players[userID].name);
 		}
-		this.room.say("**Players (" + this.playerCount + ")**: " + players.join(", "));
+		this.room.say("**Players (" + this.getRemainingPlayerCount() + ")**: " + players.join(", "));
 	}
 	handlehtml(message) {
-		return;
+		message = message[0];
+		message = message.substr(21);
+		console.log(message);
+		console.log(message.substr(4, 2));
+		if (message.substr(0, 4) === "Roll") {
+			let colonIndex = message.indexOf(":");
+			message = message.substr(colonIndex + 2);
+			message = message.substr(0, message.length - 6);
+			if (typeof this.handleRoll === 'function') this.handleRoll(Math.floor(message));
+		} else if (message.substr(4, 2) === "We") {
+			let colonIndex = message.indexOf(":");
+			message = message.substr(colonIndex + 7);
+			message = message.substr(0, message.length - 6);
+			if (typeof this.handlePick === 'function') this.handlePick(message);
+		}
 	}
 }
 
@@ -460,6 +482,7 @@ class GamesManager {
 									found = true;
 								}
 							} else {
+								console.log(paramsList.join(", ") + " " + mon);
 								found = true;
 							}
 							if (found) break;

@@ -164,7 +164,7 @@ class HangmanBomb extends Games.Game {
 		this.curGuesses.clear();
 		this.category = this.categories[Math.floor(Math.random() * this.categories.length)];
 		this.answer = data[this.category][Math.floor(Math.random() * data[this.category].length)];
-		this.say("**Players (" + this.numPlayers() + ")**: " + players.join(", "));
+		this.say("**Players (" + this.getRemainingPlayerCount() + ")**: " + players.join(", "));
 		this.nextLetter();
 	}
 	guess(guess, user) {

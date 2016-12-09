@@ -98,6 +98,7 @@ class Pikachu extends Games.Game {
 							addstr = "$";
 						} else {
 							addstr = "*";
+							this.starSpot = [i, j];
 						}
 					} else {
 						if (Math.random() < 0.2) {
@@ -111,8 +112,6 @@ class Pikachu extends Games.Game {
 				this.map[i].push(addstr);
 			}
 		}
-		this.map[9][7] = "*";
-		this.starSpot = [9, 7];
 	}
 
 	displayBoard() {
@@ -290,7 +289,7 @@ class Pikachu extends Games.Game {
 			} else {
 				this.say(this.curPlayer.name + " passed by a star position and was able to buy it!");
 				coins -= 100;
-				this.coins.get(this.curPlayer, coins);
+				this.coins.set(this.curPlayer, coins);
 				let stars = this.stars.get(this.curPlayer) || 0;
 				stars++;
 				this.stars.set(this.curPlayer, stars);
@@ -402,6 +401,7 @@ class Pikachu extends Games.Game {
 		} else if (card.targetSquare) {
 			if (playList.length < 3) {
 				this.say("Usage: ``" + Config.commandCharacter + "play " + card.name + ", [row], [column]``");
+				return;
 			} else {
 				let letters = "abcdefghij";
 				let x = letters.indexOf(Tools.toId(playList[1]));
@@ -669,7 +669,7 @@ class Pikachu extends Games.Game {
 			return;
 		}
 		let curCards = this.cards.get(player);
-		curCards.add(card);
+		curCards.push(card);
 		this.coins.set(player, coins - card.cost);
 		clearTimeout(this.timeout);
 		this.canBuy = false;

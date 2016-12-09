@@ -10,6 +10,16 @@
 'use strict';
 const fs = require('fs');
 let commands = {
+	js: 'eval',
+	eval: function (target, room, user) {
+		if (!user.isDeveloper()) return;
+		try {
+			target = eval(target);
+			this.say(JSON.stringify(target));
+		} catch (e) {
+			this.say(e.name + ": " + e.message);
+		}
+	},
 	gamesignups: 'signups',
 	signups: function (target, room, user) {
 		if (!user.isDeveloper() && !user.hasRank(room, '+')) return;
@@ -181,6 +191,21 @@ let commands = {
 	g: function (target, room, user) {
 		if (!room.game) return;
 		if (typeof room.game.guess === 'function') room.game.guess(target, user);
+	},
+
+	bid: function (target, room, user) {
+		if (!room.game) return;
+		if (typeof room.game.bid === 'function') room.game.bid(target, user);
+	},
+
+	wager: function (target, room, user) {
+		if (!room.game) return;
+		if (typeof room.game.wager === 'function') room.game.wager(target, user);
+	},
+
+	select: function (target, room, user) {
+		if (!room.game) return;
+		if (typeof room.game.select === 'function') room.game.select(target, user);
 	},
 
 	r: 'roll',
@@ -389,7 +414,7 @@ let commands = {
 	},
 
 	mashup: function (target, room, user) {
-		if (!user.hasRank(room, '+') || room.game) return;
+		if ((!user.hasRank(room, '+') && room !== user) || room.game) return;
 		Games.createMiniGame("mashup", room);
 	},
 
@@ -423,35 +448,21 @@ let commands = {
 
 	topbits: 'top',
 	top: function (target, room, user) {
-		if (!user.hasRank(room, '+') && room.name !== user.name) return;
-		fs.readFile('bits.txt', function (err, data) {
-			if (err) {
-				console.error(err);
-			}
-			data = JSON.parse(data);
-			let items = Object.keys(data).map(function (key) {
-				return [key, data[key]];
-			});
-			items.sort(function (first, second) {
-				return second[1] - first[1];
-			});
-			let strs = [];
-			let realNum = 5;
-			let realTarget = Math.floor(target);
-			if (realTarget) {
-				realNum = realTarget;
-			}
-			if (realNum < 5) {
-				realNum = 5;
-			}
-			if (realNum > items.length) {
-				realNum = items.length;
-			}
-			for (let i = Math.max(0, realNum - 5); i < realNum; i++) {
-				strs.push(i + 1 + Tools.getSuffix(i + 1) + ": __" + items[i][0] + "__(" + items[i][1] + ")");
-			}
-			room.say("``Top " + realNum + " of " + items.length + "``: " + strs.join(", "));
+		if (!user.hasRank(room, '+') && room !== user) return;
+		if (!target) target = 'groupchat-ladymonita-theworkshop';
+		if (!(target in Storage.databases) || !('leaderboard' in Storage.databases[target])) return;
+		let items = Object.keys(Storage.databases[target].leaderboard).map(function (key) {
+			return [key, Storage.databases[target].leaderboard[key].points];
 		});
+		let strs = [];
+		let realNum = 5;
+		if (realNum > items.length) {
+			realNum = items.length;
+		}
+		for (let i = Math.max(0, realNum - 5); i < realNum; i++) {
+			strs.push(i + 1 + Tools.getSuffix(i + 1) + ": __" + items[i][0] + "__(" + items[i][1] + ")");
+		}
+		room.say("``Top " + realNum + " of " + items.length + "``: " + strs.join(", "));
 	},
 
 	chieve: function (target, room, user) {
