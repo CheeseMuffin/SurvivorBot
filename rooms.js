@@ -207,9 +207,7 @@ class Room {
 	}
 
 	chatMessage(message, user) {
-		console.log("sup");
 		if (!Users.self.hasRank(this, '%')) return;
-		console.log("nerds");
 		if (!(user.id in this.chatData)) {
 			let val = 0;
 			if (this.id.startsWith('groupchat-')) {
@@ -222,13 +220,7 @@ class Room {
 		var takeAction = false;
 		var action, muteMessage;
 		var capsMatch = message.replace(/[^A-Za-z]/g, '').match(/[A-Z]/g);
-		console.log(capsMatch);
-		if (capsMatch) {
-			console.log(capsMatch.length);
-		}
-		console.log(Math.floor(Tools.toId(message).length * MIN_CAPS_PROPORTION));
 		if (capsMatch && Tools.toId(message).length >= MIN_CAPS_LENGTH && capsMatch.length >= Math.floor(Tools.toId(message).length * MIN_CAPS_PROPORTION)) {
-			console.log("hi");
 			takeAction = true;
 			muteMessage = 'Automated Response: Caps';
 		}
@@ -242,7 +234,6 @@ class Room {
 			}
 		}
 		if (takeAction) {
-			console.log("HI");
 			let cur = this.chatData[user.id].mute;
 			if (cur === 0) {
 				action = 'warn';
