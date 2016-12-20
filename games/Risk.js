@@ -1,12 +1,12 @@
 'use strict';
 
 const name = "Risk";
-const description = "";
+const description = "**Risk**: Pssh, who needs an army when you have a hulk? Game rules: http://survivor-ps.weebly.com/risk.html";
 const id = Tools.toId(name);
 const nations = {
 	pt: {name: "the Primitive Tribe", aliases: ["pt", "primitivetribe", "theprimitivetribe"], armies: 25, gain: 10},
 	in: {name: "the Island Nation", aliases: ["in", "islandnation", "theislandnation"], armies: 50, gain: 20},
-	pr: {name: "the Populous Republic", aliases: ["pr", "populousrepublic", "thepopulousrepublic"], armies: 100, gain: 50},
+	pr: {name: "the Populous Republic", aliases: ["pr", "populousrepublic", "thepopulousrepublic", "poprep"], armies: 100, gain: 50},
 	nwca: {name: "the Nuclear-War Crazed Autocracy", aliases: ["nwca", "nuclearwarcrazedautocracy", "thenuclearwarcrazedautocracy"], armies: 150, gain: 70},
 	russia: {name: "Russia", aliases: ["russia"], armies: 200, gain: 100},
 };
@@ -34,14 +34,31 @@ class Risk extends Games.Game {
 	onNextRound() {
 		this.canAttack = true;
 		this.attacks.clear();
+		this.numAttacks = 0;
+		if (this.getRemainingPlayerCount() === 0) {
+			this.say("Everyone was mked!");
+			this.end();
+			return;
+		}
 		if (this.round < 4) {
 			this.order = [];
+			let strs = [];
+			for (let userID in this.players) {
+				let player = this.players[userID];
+				if (player.eliminated) continue;
+				strs.push(player.name + "(" + this.troops.get(player) + ")");
+			}
+			this.say("**Players: (" + this.getRemainingPlayerCount() + ")**:" + strs.join(", "));
 			this.say("PM me which country you would like to attack! **Command:** ``" + Config.commandCharacter + "destroy [name]``");
-			this.timeout = setTimeout(() => this.handleAttacks(), 30 * 1000);
+			this.timeout = setTimeout(() => this.listRemaining(), 60 * 1000);
 		} else {
 			if (this.round === 4) {
 				this.doingCountry = false;
 				this.say("It is now time for hunger games, with the number of troops you earned from before!");
+			}
+			if (this.attackPlayer) {
+				this.say(this.curPlayer.name + " didn't attack anyone and is eliminated!");
+				this.curPlayer.eliminated = true;
 			}
 			if (this.getRemainingPlayerCount() === 1) {
 				let winPlayer = this.getLastPlayer();
@@ -49,6 +66,8 @@ class Risk extends Games.Game {
 				this.end();
 				return;
 			} else if (this.getRemainingPlayerCount() === 2) {
+				this.rolla = null;
+				this.rollb = null;
 				let playersLeft = this.getRemainingPlayers();
 				this.curPlayer = playersLeft[Object.keys(playersLeft)[0]];
 				this.oplayer = playersLeft[Object.keys(playersLeft)[1]];
@@ -66,8 +85,40 @@ class Risk extends Games.Game {
 					strs.push(player.name + "(" + this.troops.get(player) + ")");
 				}
 				this.say("!pick " + strs.join(", "));
+				this.attackPlayer = true;
+				this.timeout = setTimeout(() => this.nextRound(), 90 * 1000);
 			}
 		}
+	}
+
+	listRemaining() {
+		let waitings = []
+		for (let userID in this.players) {
+			let player = this.players[userID];
+			if (player.eliminated) continue;
+			let curAttack = this.attacks.get(player);
+			if (!curAttack) waitings.push(player.name);
+		}
+		this.say("Waiting on: "  + waitings.join(", "));
+		this.timeout = setTimeout(() => this.elimPlayers(), 30 * 1000);
+	}
+
+	elimPlayers() {
+		for (let userID in this.players) {
+			let player = this.players[userID];
+			let curAttack = this.attacks.get(player);
+			if (!curAttack) {
+				player.say("You didn't attack a country this round and were eliminated!");
+				this.players[userID].eliminated = true;
+			}
+		}
+		if (this.getRemainingPlayerCount() === 1) {
+			let winPlayer = this.getLastPlayer();
+			this.say("Since people were modkilled, " + winPlayer.name + " won!");
+			this.end();
+			return;
+		}
+		this.handleAttacks();
 	}
 
 	handleAttacks() {
@@ -117,6 +168,8 @@ class Risk extends Games.Game {
 					this.timeout = setTimeout(() => this.handleAttacks(), 5 * 1000);
 				} else {
 					this.say("The rolls were a tie! Rerolling...");
+					this.rolla = null;
+					this.rollb = null;
 					this.doCountryAttack();
 				}
 			} else {
@@ -159,6 +212,7 @@ class Risk extends Games.Game {
 			this.say("Are you really sure you want to attack yourself?");
 			return;
 		}
+		this.attackPlayer = false;
 		this.say("**" + this.curPlayer.name + "** has chosen to attack **" + oplayer.name + "**!");
 		clearTimeout(this.timeout);
 		this.oplayer = oplayer;
@@ -166,18 +220,11 @@ class Risk extends Games.Game {
 	}
 
 	destroy(target, user) {
-		console.log("hi");
 		if (!this.canAttack) return;
-		console.log("hi1");
-		console.log(user);
-		console.log(this.players);
 		let player = this.players[user.id];
-		console.log("hi2");
-		if (!player) return;
-		console.log("hi3");
+		if (!player || player.eliminated) return;
 		let curAttack = this.attacks.get(player);
 		if (curAttack) return;
-		console.log("hi4");
 		let country = null;
 		target = Tools.toId(target);
 		for (let countryID in nations) {
@@ -187,13 +234,18 @@ class Risk extends Games.Game {
 				break;
 			}
 		}
-		if (!target) {
+		if (!country) {
 			user.say("That is not a valid country!");
 			return;
 		}
 		this.attacks.set(player, country);
 		user.say("You have attacked " + country.name + "!");
 		this.order.push(player);
+		this.numAttacks++;
+		if (this.numAttacks === this.getRemainingPlayerCount()) {
+			clearTimeout(this.timeout);
+			this.handleAttacks();
+		}
 	}
 }
 

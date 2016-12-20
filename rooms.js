@@ -8,6 +8,8 @@
  */
 
 'use strict';
+const MIN_CAPS_LENGTH = 12;
+const MIN_CAPS_PROPORTION = 0.8;
 
 class Room {
 	constructor(id) {
@@ -16,6 +18,7 @@ class Room {
 		this.canVote = false;
 		this.users = new Map();
 		this.votes = new Map();
+		this.chatData = {};
 	}
 
 	vote(gameName, user) {
@@ -26,11 +29,13 @@ class Room {
 			} else {
 				let aliases = Games.aliases[realGame];
 				let found = false;
-				for (let i = 0, len = aliases.length; i < len; i++) {
-					if (Tools.toId(aliases[i]) === Tools.toId(gameName)) {
-						realName = realGame;
-						found = true;
-						break;
+				if (aliases.length) {
+					for (let i = 0, len = aliases.length; i < len; i++) {
+						if (Tools.toId(aliases[i]) === Tools.toId(gameName)) {
+							realName = realGame;
+							found = true;
+							break;
+						}
 					}
 				}
 				if (found) break;
@@ -155,7 +160,7 @@ class Room {
 			if (!user) return;
 			rank = splitMessage[0].charAt(0);
 			if (user.rooms.get(this) !== rank) user.rooms.set(this, rank);
-			if (user.id === Users.self.id) return;
+			//if (user.id === Users.self.id) return;
 			CommandParser.parse(splitMessage.slice(1).join('|'), this, user);
 			break;
 		case 'c:':
@@ -164,6 +169,7 @@ class Room {
 			rank = splitMessage[1].charAt(0);
 			if (user.rooms.get(this) !== rank) user.rooms.set(this, rank);
 			//if (user.id === Users.self.id) return;
+			this.chatMessage(splitMessage.slice(2).join('|'), user);
 			CommandParser.parse(splitMessage.slice(2).join('|'), this, user, splitMessage[0] * 1000);
 			break;
 
@@ -197,6 +203,58 @@ class Room {
 			stuff = splitMessage[0];
 			Battles.handleSwitch(this, stuff); // eslint-disable-line no-undef
 			break;
+		}
+	}
+
+	chatMessage(message, user) {
+		console.log("sup");
+		if (!Users.self.hasRank(this, '%')) return;
+		console.log("nerds");
+		if (!(user.id in this.chatData)) {
+			let val = 0;
+			if (this.id.startsWith('groupchat-')) {
+				val = 1;
+			}
+			this.chatData[user.id] = {
+				mute: val,
+			};
+		}
+		var takeAction = false;
+		var action, muteMessage;
+		var capsMatch = message.replace(/[^A-Za-z]/g, '').match(/[A-Z]/g);
+		console.log(capsMatch);
+		if (capsMatch) {
+			console.log(capsMatch.length);
+		}
+		console.log(Math.floor(Tools.toId(message).length * MIN_CAPS_PROPORTION));
+		if (capsMatch && Tools.toId(message).length >= MIN_CAPS_LENGTH && capsMatch.length >= Math.floor(Tools.toId(message).length * MIN_CAPS_PROPORTION)) {
+			console.log("hi");
+			takeAction = true;
+			muteMessage = 'Automated Response: Caps';
+		}
+		var stretchMatch = /(.)\1{7,}/gi.test(message) || /(..+)\1{4,}/gi.test(message);
+		if (stretchMatch) {
+			takeAction = true;
+			if (muteMessage) {
+				muteMessage += ", Stretching";
+			} else {
+				muteMessage = 'Automated Response: Stretching';
+			}
+		}
+		if (takeAction) {
+			console.log("HI");
+			let cur = this.chatData[user.id].mute;
+			if (cur === 0) {
+				action = 'warn';
+			} else if (cur === 1) {
+				action = 'mute';
+			} else if (cur === 2) {
+				action = 'hourmute';
+			} else {
+				action = 'rb';
+			}
+			this.chatData[user.id].mute++;
+			this.say("/" + action + " " + user.name + ", " + muteMessage);
 		}
 	}
 }

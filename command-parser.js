@@ -55,26 +55,31 @@ class Context {
 class CommandParser {
 	parse(message, room, user, time) {
 		message = message.trim();
-		if (message.charAt(0) !== Config.commandCharacter) return;
-		message = message.substr(1);
-		let spaceIndex = message.indexOf(' ');
-		let target = '';
-		let command = '';
-		if (spaceIndex !== -1) {
-			command = message.substr(0, spaceIndex);
-			target = message.substr(spaceIndex + 1);
+		if (message === '/me in' && room.game) {
+			room.game.join(user);
 		} else {
-			command = message;
-			Games.sayDescription(command, room);
+			if (message.charAt(0) !== Config.commandCharacter) return;
+			
+			message = message.substr(1);
+			let spaceIndex = message.indexOf(' ');
+			let target = '';
+			let command = '';
+			if (spaceIndex !== -1) {
+				command = message.substr(0, spaceIndex);
+				target = message.substr(spaceIndex + 1);
+			} else {
+				command = message;
+				Games.sayDescription(command, room);
+			}
+			if (!Commands[command]) return;
+			let type = typeof Commands[command];
+			if (type === 'string') {
+				command = Commands[command];
+				type = typeof Commands[command];
+			}
+			if (type !== 'function') return;
+			new Context(target, room, user, command, time).run();
 		}
-		if (!Commands[command]) return;
-		let type = typeof Commands[command];
-		if (type === 'string') {
-			command = Commands[command];
-			type = typeof Commands[command];
-		}
-		if (type !== 'function') return;
-		new Context(target, room, user, command, time).run();
 	}
 }
 

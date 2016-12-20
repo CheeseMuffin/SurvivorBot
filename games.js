@@ -10,69 +10,6 @@
 'use strict';
 
 const fs = require('fs');
-const data = {};
-const monForms = {};
-for (let i in Tools.data.pokedex) {
-	let mon = Tools.data.pokedex[i];
-	if (mon.num < 1) continue;
-	let species = mon.species;
-	data[species] = {};
-	data[species]["stuff"] = [mon.color];
-	for (let key in mon.abilities) {
-		data[species]["stuff"].push(mon.abilities[key]);
-	}
-	for (let j = 0; j < mon.types.length; j++) {
-		data[species]["stuff"].push(mon.types[j]);
-	}
-	if (mon.otherFormes) {
-		for (let j = 0, len = mon.otherFormes.length; j < len; j++) {
-			monForms[mon.otherFormes[j]] = species;
-		}
-	}
-	let gen = Tools.generation(mon.num);
-	if (mon.formeLetter === "M") {
-		gen = 6;
-	} else if (mon.formeLetter === "A") {
-		gen = 7;
-	}
-	data[species]["stuff"].push(gen);
-	if (species === "Smeargle") {
-		data[species]["Pokemon Moves"] = [];
-		for (let move in Tools.data.moves) {
-			data[species]["Pokemon Moves"].push(Tools.data.moves[move].name);
-			data[species]["stuff"].push(Tools.data.moves[move].name);
-		}
-	} else if (i in Tools.data.learnsets) {
-		data[species]["Pokemon Moves"] = [];
-		for (let move in Tools.data.learnsets[i].learnset) {
-			data[species]["Pokemon Moves"].push(Tools.data.moves[move].name);
-			data[species]["stuff"].push(Tools.data.moves[move].name);
-		}
-	} else if (i in monForms) {
-		data[species]["Pokemon Moves"] = data[monForms[i]]["Pokemon Moves"];
-		for (let j = 0; j < data[species]["Pokemon Moves"].length; j++) {
-			data[species]["stuff"].push(data[species]["Pokemon Moves"][j]);
-		}
-	}
-	if (mon.prevo) {
-		let prevoMon = Tools.data.pokedex[mon.prevo];
-		if (prevoMon.species in data) {
-			let prevoMoves = data[prevoMon.species]["Pokemon Moves"];
-			for (let j = 0; j < prevoMoves.length; j++) {
-				if (data[species]["Pokemon Moves"].indexOf(prevoMoves[j]) === -1) {
-					data[species]["Pokemon Moves"].push(prevoMoves[j]);
-					data[species]["stuff"].push(prevoMoves[j]);
-				}
-			}
-		}
-	}
-	if (Tools.data.battle[i] && Tools.data.battle[i].tier) {
-		data[species]["stuff"].push(Tools.data.battle[i].tier);
-	} else if (i in monForms) {
-		data[species]["stuff"].push(Tools.data.battle[Tools.toId(monForms[i])].tier);
-	}
-}
-
 
 class Player {
 	constructor(user) {
@@ -110,20 +47,15 @@ class Game {
 	}
 
 	signups() {
-		this.say("Hosting a game of " + this.name + "! " + (this.freeJoin ? "(free join)" : "If you would like to play, use the command ``" + Config.commandCharacter + "join``."));
+		this.say("survgame! If you would like to play, use the command ``/me in``");
 		if (this.description) this.say("Description: " + this.description);
 		if (typeof this.onSignups === 'function') this.onSignups();
 		if (this.freeJoin) this.started = true;
 	}
 
-	winUser(numBits, player) {
-		player.say("You were awarded " + numBits + " bits for winning the game! You can use the command ``" + Config.commandCharacter + "bits`` to check your bits.");
-		Games.addBits(numBits, player.name); // eslint-disable-line no-use-before-define
-	}
-
 	start() {
 		if (this.started) return;
-		if (this.playerCount < 1) {
+		if (this.playerCount < 2) {
 			this.say("The game needs at least two players to start!");
 			return;
 		}
@@ -158,6 +90,7 @@ class Game {
 		if (typeof this.onEnd === 'function') this.onEnd();
 		this.ended = true;
 		this.room.game = null;
+		if (this.room.id === 'survivor') this.say(".done");
 	}
 
 	forceEnd() {
@@ -299,33 +232,24 @@ class Game {
 	}
 }
 
-class Minigame extends Game {
-	constructor(room) {
-		super(room);
-		this.freeJoin = true;
-		this.minigame = true;
-	}
-
-	signups() {
-		this.say(this.description);
-		if (typeof this.onSignups === 'function') this.onSignups();
-	}
-}
-
 class GamesManager {
 	constructor() {
 		this.games = {};
 		this.aliases = {};
-		this.pastGames = {};
 		this.fileMap = {};
+		this.host = null;
+		this.hosts = [];
 	}
 
+	timer(room) {
+		room.say("**Time's up!**");
+	}
 	onLoad() {
 		this.loadGames();
 	}
 
 	loadGame(fileName) {
-		delete require.cache["C:\\Users\\TEAM VELLOTTI\\Desktop\\Showdown\\Bot Stuff\\Cassius\\games\\" + fileName];
+		delete require.cache[Config.homepath + fileName];
 		let file = require('./games/' + fileName);
 		if (file.game && file.name && file.id) this.games[file.id] = file;
 		this.aliases[file.name] = file.aliases;
@@ -365,7 +289,7 @@ class GamesManager {
 	}
 
 	createMiniGame(game, room) {
-		if (room.game) return room.say("A game is already in progress!");
+		if (room.game) return room.say("A game of " + room.game.name + " is already in progress.");
 		if (room.canVote) return room.say("Voting is in progress");
 		this.loadGames();
 		let id = Tools.toId(game);
@@ -385,7 +309,7 @@ class GamesManager {
 		room.game.signups();
 	}
 	createGame(game, room) {
-		if (room.canVote) return room.say("Voting is in progress");
+		if (room.canVote) return room.say("Voting is in progress!");
 		if (room.game) {
 			if (room.game.minigame) {
 				return room.say("A minigame is in progress!");
@@ -407,181 +331,11 @@ class GamesManager {
 		if (this.games[id].minigame) return room.say("You cannot signup a minigame!");
 		this.loadGame(this.fileMap[id]);
 		room.game = new this.games[id].game(room); // eslint-disable-line new-cap
-		if (room.name in this.pastGames) {
-			let cur = this.pastGames[room.name];
-			cur.push(room.game.name);
-			if (cur.length > 8) {
-				cur.splice(0, 1);
-			}
-			this.pastGames[room.name] = cur;
-		} else {
-			this.pastGames[room.name] = [room.game.name];
-		}
-	}
-
-	addBits(numBits, username) {
-		fs.readFile('bits.txt', function (err, data) {
-			if (err) {
-				return console.error(err);
-			}
-			data = JSON.parse(data);
-			let found = false;
-			for (let name in data) {
-				if (Tools.toId(name) === Tools.toId(username)) {
-					let curBits = data[name];
-					curBits += numBits;
-					data[name] = curBits;
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				data[username] = numBits;
-			}
-			fs.writeFile('bits.txt', JSON.stringify(data));
-		});
-	}
-
-	addChieve(chieveName, username) {
-		fs.readFile('chieves.txt', function (err, data) {
-			if (err) {
-				console.error(err);
-			}
-			data = JSON.parse(data);
-			let stuff = [];
-			for (let key in data) {
-				if (Tools.toId(key) === Tools.toId(username)) {
-					stuff = data[key];
-					if (stuff.indexOf(chieveName) !== -1) return;
-					stuff.push(chieveName);
-					data[key] = stuff;
-					break;
-				}
-			}
-			if (stuff.length === 0) {
-				data[username] = [chieveName];
-			}
-			Users.get(username).say("You got the chieve " + chieveName + " and received 500 bits!");
-			fs.writeFile('chieves.txt', JSON.stringify(data));
-			Games.addBits(500, username); // eslint-disable-line no-use-before-define
-		});
-	}
-
-	follows(mon, paramList) {
-		let stuff = data[mon]["stuff"];
-		for (let i = 0; i < paramList.length; i++) {
-			if (stuff.indexOf(paramList[i]) === -1) return false;
-		}
-		return true;
-	}
-	solveParam(numParams, mons, user) {
-		let monsList = mons.split(", ");
-		let sharedParams = [];
-		let firstParams = data[monsList[0]]["stuff"];
-		for (let i = 0; i < firstParams.length; i++) {
-			let bad = false;
-			for (let j = 1; j < monsList.length; j++) {
-				if (data[monsList[j]]["stuff"].indexOf(firstParams[i]) === -1) {
-					bad = true;
-					break;
-				}
-			}
-			if (!bad) {
-				sharedParams.push(firstParams[i]);
-			}
-		}
-		console.log(sharedParams);
-		if (numParams === 2) {
-			for (let i = 0; i < sharedParams.length; i++) {
-				for (let j = i + 1; j < sharedParams.length; j++) {
-					let paramsList = [sharedParams[i], sharedParams[j]];
-					let found = false;
-					for (let mon in data) {
-						if (this.follows(mon, paramsList) && monsList.indexOf(mon) === -1) {
-							let dexEntry = Tools.data.pokedex[Tools.toId(mon)];
-							if (dexEntry.baseSpecies) {
-								let otherName = dexEntry.baseSpecies;
-								if (this.follows(otherName, paramsList) && monsList.indexOf(otherName) === -1) {
-									found = true;
-								}
-							} else {
-								console.log(paramsList.join(", ") + " " + mon);
-								found = true;
-							}
-							if (found) break;
-						}
-					}
-					if (!found) {
-						user.say("A possible set of params is " + paramsList.join(", "));
-						return;
-					}
-				}
-			}
-		} else if (numParams === 3) {
-			for (let i = 0; i < sharedParams.length; i++) {
-				for (let j = i + 1; j < sharedParams.length; j++) {
-					for (let k = j + 1; k < sharedParams.length; k++) {
-						let paramsList = [sharedParams[i], sharedParams[j], sharedParams[k]];
-						let found = false;
-						for (let mon in data) {
-							if (this.follows(mon, paramsList) && monsList.indexOf(mon) === -1) {
-								let dexEntry = Tools.data.pokedex[Tools.toId(mon)];
-								if (dexEntry.baseSpecies) {
-									let otherName = dexEntry.baseSpecies;
-									if (this.follows(otherName, paramsList) && monsList.indexOf(otherName) === -1) {
-										found = true;
-									}
-								} else {
-									found = true;
-								}
-								if (found) break;
-							}
-						}
-						if (!found) {
-							user.say("A possible set of params is " + paramsList.join(", "));
-							return;
-						}
-					}
-				}
-			}
-		} else if (numParams === 4) {
-			for (let i = 0; i < sharedParams.length; i++) {
-				for (let j = i + 1; j < sharedParams.length; j++) {
-					for (let k = j + 1; k < sharedParams.length; k++) {
-						for (let l = k + 1; l < sharedParams.length; l++) {
-							let paramsList = [sharedParams[i], sharedParams[j], sharedParams[k], sharedParams[l]];
-							let found = false;
-							for (let mon in data) {
-								if (this.follows(mon, paramsList) && monsList.indexOf(mon) === -1) {
-									let dexEntry = Tools.data.pokedex[Tools.toId(mon)];
-									if (dexEntry.baseSpecies) {
-										let otherName = dexEntry.baseSpecies;
-										if (this.follows(otherName, paramsList) && monsList.indexOf(otherName) === -1) {
-											found = true;
-										}
-									} else {
-										found = true;
-									}
-									if (found) break;
-								}
-							}
-							if (!found) {
-								user.say("A possible set of params is " + paramsList.join(", "));
-								return;
-							}
-						}
-					}
-				}
-			}
-		}
-		user.say("I couldn't find an answer for your param rip.");
+		return room.game;
 	}
 }
 
 let Games = new GamesManager();
-
-
-Games.Minigame = Minigame;
 Games.Game = Game;
 Games.Player = Player;
 

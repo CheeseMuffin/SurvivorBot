@@ -40,6 +40,7 @@ class HG extends Games.Game {
 		} else {
 			let names = [];
 			for (let userID in this.players) {
+				if (this.players[userID].eliminated) continue;
 				names.push(this.players[userID].name);
 			}
 			this.say("!pick " + names.join(", "));
@@ -98,6 +99,7 @@ class HG extends Games.Game {
 				this.rollb = null;
 				this.handleAttack();
 			}
+			this.timeout = setTimeout(() => this.handleAttack(), 90 * 1000);
 		}
 	}
 

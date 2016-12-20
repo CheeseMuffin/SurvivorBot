@@ -94,9 +94,7 @@ class Dexterity extends Games.Game {
 		} else {
 			this.curPlayer = this.order[0];
 			this.oplayer = this.attacks.get(this.curPlayer);
-			console.log(this.order);
 			this.order.splice(0, 1);
-			console.log(this.order);
 			if (!(this.curPlayer.id in this.players) || !this.oplayer) {
 				this.handleAttacks();
 			}
@@ -138,9 +136,7 @@ class Dexterity extends Games.Game {
 				this.say("The rolls were a tie! Rerolling...");
 				this.doAttacks();
 			}
-			console.log("hi");
-			if (this.winIndex !== null) {
-				console.log("ayy lmao");
+			if (this.winIndex) {
 				let bothPlayers = [this.curPlayer, this.oplayer];
 				let item = this.items.get(bothPlayers[this.winIndex]);
 				let realitem = data[item];

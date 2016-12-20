@@ -6,8 +6,23 @@
  *
  * @license MIT license
  */
-
 'use strict';
+const gifts = ["A new pair of pants", "A hug C:", "The new copy of sun and moon you were hoping for!"];
+const jokes = ["How does a tree go? It leaves.",
+			  // "Why didn't the skeleton go to the party? He had no-body to dance with!",
+			  // "Why didn't the skeleton cross the road? Because he didn't have the guts!",
+			   '"Somebody told me you remind them of an owl." "Who?"',
+			   "How do you make an octopus laugh? With ten-tickles!",
+			   "What's an octupus' favorite dessert? Octo-pi!",
+			   //"This joke is like a bar at a wedding; it has no punchline.",
+			   'There were two twins named Juan and Amal. I saw a picture of Juan, and wanted to see Amal to compare them, but my friend said, "once you\'ve seen Juan you\'ve seen Amal.',
+			   "What do you call an alligator in a vest? An investigator!",
+			   //"Whats a ghosts favorite fruit? Booberries.",
+			  // "Whats a vampires favorite fruit? Necktarines.",
+			   "What do you get when you cross a snowman and a vampire? Frostbite.",
+			   "What do you call it when you Santa stops moving? Santa Pause."
+				]
+
 const fs = require('fs');
 let commands = {
 	js: 'eval',
@@ -20,28 +35,220 @@ let commands = {
 			this.say(e.name + ": " + e.message);
 		}
 	},
+	
+	roomsay: function (target, room, user) {
+		if (!user.isDeveloper()) return;
+		let splitStr = target.split(",");
+		if (splitStr.length !== 2) return;
+		let realroom = Rooms.get(splitStr[0]);
+		if (!realroom) return;
+		realroom.say(splitStr[1]);
+	},
+	pick: function (target, room, user) {
+		if (!user.hasRank(room, '+') && (!Games.host || Games.host.id !== user.id)) return;
+		if (Users.self.hasRank(room, '*')) {
+			let stuff = target.split(",");
+			let str = "<em>We randomly picked:</em> " + Tools.sample(stuff);
+				
+			if (room.id === 'survivor') {
+				room.say("/addhtmlbox " + str);
+			} else {
+				room.say("!htmlbox " + str);
+			}
+		}
+		else {
+			this.say("!pick " + target);
+		}
+	},
+
+	hostqueue: function (target, room, user) {
+		if (!user.hasRank(room, '%')) return;
+		if (Games.hosts.length === 0) {
+			return room.say("The hostqueue is empty.");
+		}
+		room.say("__" + Games.hosts.join("__, __") + "__");
+	},
+
+	nexthost: function (target, room, user) {
+		if (!user.hasRank(room, '%')) return;
+		if (Games.host) {
+			return room.say("A game is currently in progress!");
+		}
+		if (Games.hosts.length === 0) {
+			return room.say("The hostqueue is empty.");
+		}
+		let name = Games.hosts.shift();
+		room.say("survgame! " + name + " is hosting! Do ``/me in`` to join!");
+		Games.host = Users.get(name);
+	},
+
+	host: function (target, room, user) {
+		if (!user.hasRank(room, '%')) return;
+		let realuser = Users.get(target);
+		if (!realuser) return;
+		if (Games.host) {
+			room.say(realuser.name + " was added to the hostqueue!");
+			console.log(Games.hosts);
+			Games.hosts.push(realuser.name);
+			return;
+		}
+		Games.host = realuser;
+		room.say("survgame! " + realuser.name + " is hosting! Do ``/me in`` to join!");
+	},
+
+	rollswitch: 'rs',
+	rs: function (target, room, user) {
+		if (room !== user && !user.hasRank(room, '+') && (!Games.host || Games.host.id !== user.id)) return;
+		room.say("**Roll Switch**: Randomly pick between Golf and Normal rules before each attack");
+	},
+
+	golf: function (target, room, user) {
+		if (room !== user && !user.hasRank(room, '+') && (!Games.host || Games.host.id !== user.id)) return;
+		room.say("**Golf**: Lower rolls win. Opposite of normal survivor");
+	},
+
+	gift: function (target, room, user) {
+		if (!user.isDeveloper() && !user.hasRank(room, '+') && (!Games.host || Games.host.id !== user.id)) return;
+		let userTar = Users.get(target);
+		if (!userTar) return;
+		this.say("Inside " + userTar.name + "'s gift is ..." + Tools.sample(gifts));
+	},
+	
+	joke: function (target, room, user) {
+		if (!user.isDeveloper() && !user.hasRank(room, '+') && (!Games.host || Games.host.id !== user.id)) return;
+		room.say(Tools.sample(jokes));
+	},
+
+	soccer: function (target, room, user) {
+		if (!user.isDeveloper() && !user.hasRank(room, '+') && (!Games.host || Games.host.id !== user.id)) return;
+		room.say("I swear, the Z is what makes my name professional xD");
+	},
+	
+	bon: function (target, room, user) {
+		if (!user.isDeveloper() && !user.hasRank(room, '+') && (!Games.host || Games.host.id !== user.id)) return;
+		room.say("Lol, more like can't dance.");
+	},
+	
+	henka: function (target, room, user) {
+		if (!user.isDeveloper() && !user.hasRank(room, '+') && (!Games.host || Games.host.id !== user.id)) return;
+		room.say("Henka will be your chef in hungry times!");
+	},
+	
+	swirlyder: function (target, room, user) {
+		if (!user.isDeveloper() && !user.hasRank(room, '+') && (!Games.host || Games.host.id !== user.id)) return;
+		return;
+	},
+
+	themes: function (target, room, user) {
+		if (!user.hasRank(room, '+') && (!Games.host || Games.host.id !== user.id)) return;
+		room.say("The list of game types can be found here: http://survivor-ps.weebly.com/themes-and-more.html");
+	},
+	timer: function (target, room, user) {
+		if (!user.hasRank(room, '+') && (!Games.host || Games.host.id !== user.id)) return;
+		let x = Math.floor(target);
+		if (!x || x >= 120 || (x < 10 && x > 2) || x <= 0) return room.say("The timer must be between 10 seconds and 2 minutes.");
+		if (x === 1) x = 60;
+		let minutes = Math.floor(x / 60);
+		let seconds = x % 60;
+		clearTimeout(Games.timeout);
+		this.say("Timer set for " + (minutes > 0 ? "1 minute" + (seconds > 0 ? " and " : "") : "") + (seconds > 0 ? ((seconds) + " second" + (seconds > 1 ? "s" : "")) : "") + ".");
+		Games.timeout = setTimeout(() => Games.timer(room), x * 1000);
+	},
+	intro: function (target, room, user) {
+		if (room !== user && !user.hasRank(room, '+')) return;
+		this.say("Hello, welcome to Survivor! I'm the room bot. 'Survivor' is a luck-based game that uses Pokémon Showdown's /roll feature. For more info, go to: http://survivor-ps.weebly.com/");
+	},
+
+	done: function (target, room, user) {
+		if (!Games.host || Games.host.id !== user.id) return;
+		Games.host = null;
+		room.say("Thanks for playing!");
+	},
+
+	dehost: function (target, room, user) {
+		if (!user.hasRank(room, "%")) return;
+		let realuser = Users.get(target);
+		if (!realuser) return;
+		if (Games.host && Games.host.id === realuser.id) {
+			Games.host = null;
+			return;
+		}
+		let i = 0, len = Games.hosts.length;
+		for (; i < len; i++) {
+			if (realuser.id === Tools.toId(Games.hosts[i])) {
+				break;
+			}
+		}
+		if (i !== len) {
+			Games.hosts.splice(i, 1);
+			return room.say(realuser.name + " was removed from the hosting queue.");
+		}
+	},
+
+	roll: function (target, room, user) {
+		let realtarget = target;
+		if (!user.hasRank(room, '+') && (!Games.host || Games.host.id !== user.id)) return;
+		let plusIndex = target.indexOf("+");
+		let adder = 0;
+		if (plusIndex !== -1) {
+			adder = parseInt(target.substr(plusIndex + 1));
+			let str = adder.toString();
+			if (str.length !== (target.substr(plusIndex + 1)).length) return;
+			if (!adder) return;
+			target = target.substr(0, plusIndex);
+		}
+		let dIndex = target.indexOf("d");
+		let numDice = 1;
+		let roll;
+		if (dIndex !== -1) {
+			numDice = parseInt(target.substr(0, dIndex));;
+			if (!numDice) return;
+			roll = parseInt(target.substr(dIndex + 1));
+			if (!roll) return;	
+		} else {
+			roll = parseInt(target);
+			if (!roll) return;
+		}
+		let rolls = [];
+		let sum = 0;
+		for (let i = 0; i < numDice; i++) {
+			rolls.push(Tools.random(roll) + 1);
+			sum += rolls[i];
+		}
+		if ((Users.self.hasRank(room, "*"))) {
+			if (numDice === 1) {
+				let str = "Roll (1 - " + roll + "): " + rolls[0];
+				if (room.id === 'survivor') {
+					this.say("/addhtmlbox " + str);
+				} else {
+					this.say("!htmlbox " + str);
+				}
+			} else {
+				let str = numDice + " Rolls (1 - " + roll + "): " + rolls.join(", ") + "<br></br>" + "Sum: " + sum;
+				if (room.id === 'survivor') {
+					this.say("/addhtmlbox " + str);
+				} else {
+					this.say("!htmlbox " + str);
+				}
+			}
+		} else {
+			room.say("Rolls: " + rolls.join(",") + " || Total: " + (sum + adder));
+		}
+	},
 	gamesignups: 'signups',
 	signups: function (target, room, user) {
 		if (!user.isDeveloper() && !user.hasRank(room, '+')) return;
-		console.log(Config.games);
 		if (!Config.games || !Config.games.indexOf(room.id) === -1) return this.say("Games are not enabled for this room.");
-		Games.createGame(target, room);
+		if (!Games.createGame(target, room)) return;
 		room.game.signups();
 	},
+
 	startgame: 'start',
 	start: function (target, room, user) {
 		if ((!user.isDeveloper() && !user.hasRank(room, '+')) || !room.game) return;
 		if (typeof room.game.start === 'function') room.game.start();
 	},
 
-	pastgames: function (target, room, user) {
-		if (!user.hasRank(room, '+')) return;
-		if (room.name in Games.pastGames) {
-			let curGames = Games.pastGames[room.name];
-			curGames.reverse();
-			room.say("**[Recent games]** " + curGames.join(", "));
-		}
-	},
 	endgame: 'end',
 	end: function (target, room, user) {
 		if (!user.isDeveloper() && !user.hasRank(room, '+')) return;
@@ -55,130 +262,9 @@ let commands = {
 		}
 	},
 
-	solveparam: 'sp',
-	sp: function (target, room, user) {
-		if (!user.isDeveloper() || room !== user) return;
-		let stuff = target.split('|');
-		let spaceIndex = stuff[0].indexOf(" ");
-		let paramNum = Math.floor(stuff[0].substr(0, spaceIndex));
-		Games.solveParam(paramNum, stuff[1].trim(), user);
-	},
-
-	solveport: function (target, room, user) {
-		if (!user.isDeveloper() || room !== user) return;
-		let ports = target.split("]");
-		let realPorts = [];
-		for (let i = 0; i < ports.length; i++) {
-			realPorts.push(ports[i].split(" "));
-		}
-		let actualPorts = [];
-		for (let i = 0; i < realPorts.length; i++) {
-			actualPorts.push([]);
-			for (let j = 0; j < realPorts[i].length; j++) {
-				let cur = realPorts[i][j];
-				if (cur !== "") {
-					actualPorts[i].push(Tools.toId(cur));
-				}
-			}
-			if (actualPorts[i].length === 0) {
-				actualPorts.splice(i, 1);
-			}
-		}
-		let satisfyingList = [];
-		for (let i = 0; i < actualPorts.length; i++) {
-			satisfyingList.push([]);
-			if (actualPorts[i].length === 3) {
-				if (actualPorts[i][2] === 'pokemon') {
-					for (let monName in Tools.data.pokedex) {
-						let mon = Tools.data.pokedex[monName];
-						if (mon.baseSpecies || mon.num < 0) continue;
-						if (actualPorts[i][0] === 'gen') {
-							if (Tools.generation(mon.num) === Math.floor(actualPorts[i][1])) {
-								satisfyingList[i].push(monName);
-							}
-						} else if (actualPorts[i][1] === 'type') {
-							let found = false;
-							for (let k = 0; k < mon.types.length; k++) {
-								if (Tools.toId(mon.types[k]) === actualPorts[i][0]) {
-									found = true;
-									break;
-								}
-							}
-							if (found) satisfyingList[i].push(monName);
-						}
-					}
-				} else {
-					console.log("in here");
-					for (let moveName in Tools.data.moves) {
-						let move = Tools.data.moves[moveName];
-						if (Tools.toId(move.type) === actualPorts[i][0]) {
-							satisfyingList[i].push(moveName);
-						}
-					}
-				}
-			} else {
-				for (let monName in Tools.data.pokedex) {
-					let mon = Tools.data.pokedex[monName];
-					if (mon.baseSpecies || mon.num < 0) continue;
-					if (Tools.toId(mon.color) === actualPorts[i][0]) {
-						satisfyingList[i].push(monName);
-					}
-				}
-			}
-		}
-		console.log(satisfyingList);
-		if (satisfyingList.length === 2) {
-			for (let i = 0; i < satisfyingList[0].length; i++) {
-				for (let j = 0; j < satisfyingList[1].length; j++) {
-					let t1 = satisfyingList[0][i], t2 = satisfyingList[1][j];
-					let ans = Tools.isPort(t1, t2);
-					if (Tools.isPort(t1, t2)) {
-						user.say("A possible answer is " + ans);
-						return;
-					}
-				}
-			}
-			user.say("I couldn't find an answer for your port rip.");
-		} else if (satisfyingList.length === 3) {
-			for (let i = 0; i < satisfyingList[0].length; i++) {
-				for (let j = 0; j < satisfyingList[1].length; j++) {
-					let t1 = satisfyingList[0][i], t2 = satisfyingList[1][j];
-					let ans1 = Tools.isPort(t1, t2);
-					if (ans1) {
-						for (let k = 0; k < satisfyingList[2].length; k++) {
-							let t3 = satisfyingList[2][k];
-							let ans2 = Tools.isPort(ans1, t3);
-							if (ans2) {
-								user.say("A possible answer is " + ans2);
-								return;
-							}
-						}
-					}
-				}
-			}
-		} else if (satisfyingList.length === 4) {
-			for (let i = 0; i < satisfyingList[0].length; i++) {
-				for (let j = 0; j < satisfyingList[1].length; j++) {
-					let t1 = satisfyingList[0][i], t2 = satisfyingList[1][j];
-					let ans1 = Tools.isPort(t1, t2);
-					if (ans1) {
-						for (let k = 0; k < satisfyingList[2].length; k++) {
-							let t3 = satisfyingList[2][k];
-							let ans2 = Tools.isPort(ans1, t3);
-							if (ans2) {
-								for (let l = 0; l < satisfyingList[3].length; l++) {
-									let t4 = satisfyingList[3][l];
-									let ans3 = Tools.isPort(ans2, t4);
-									if (ans3) {
-										user.say("A possible answer is " + ans3);
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
+	sanjay: function (target, room, user) {
+		if (!user.hasRank(room, '+') && !user.isDeveloper()) return;
+		room.say("/me RESIGNs");
 	},
 	players: 'pl',
 	pl: function (target, room, user) {
@@ -193,32 +279,6 @@ let commands = {
 		if (typeof room.game.guess === 'function') room.game.guess(target, user);
 	},
 
-	bid: function (target, room, user) {
-		if (!room.game) return;
-		if (typeof room.game.bid === 'function') room.game.bid(target, user);
-	},
-
-	wager: function (target, room, user) {
-		if (!room.game) return;
-		if (typeof room.game.wager === 'function') room.game.wager(target, user);
-	},
-
-	select: function (target, room, user) {
-		if (!room.game) return;
-		if (typeof room.game.select === 'function') room.game.select(target, user);
-	},
-
-	r: 'roll',
-	roll: function (target, room, user) {
-		if (!room.game) return;
-		if (typeof room.game.roll === 'function') room.game.roll(target, user);
-	},
-
-	pair: function (target, room, user) {
-		if (!room.game) return;
-		if (typeof room.game.pair === 'function') room.game.pair(target, user);
-	},
-
 	joingame: 'join',
 	join: function (target, room, user) {
 		if (!room.game) return;
@@ -228,129 +288,6 @@ let commands = {
 	leave: function (target, room, user) {
 		if (!room.game) return;
 		if (typeof room.game.leave === 'function') room.game.leave(user);
-	},
-
-	choose: function (target, room, user) {
-		for (room in Rooms.rooms) {
-			let realRoom = Rooms.rooms[room];
-			if (realRoom.game && typeof realRoom.game.choose === 'function') realRoom.game.choose(user, target);
-		}
-	},
-
-	suspect: function (target, room, user) {
-		if (room.name !== user.name) return;
-		let firstComma = target.indexOf(',');
-		if (firstComma === -1) {
-			user.say("The correct syntax is " + Config.commandCharacter + "suspect user, pokemon, room");
-			return;
-		}
-		let userID = target.substr(0, firstComma);
-		target = target.substr(firstComma + 1);
-		if (target.charAt(0) === ' ') {
-			target = target.substr(1);
-		}
-		for (room in Rooms.rooms) {
-			let realRoom = Rooms.rooms[room];
-			if (realRoom.game && typeof realRoom.game.suspect === 'function') realRoom.game.suspect(user, userID, target);
-		}
-	},
-
-	suggest: 'vote',
-	vote: function (target, room, user) {
-		if (room.game) return;
-		if (!room.canVote) {
-			if (!user.hasRank(room, '+')) return;
-			let goodGames = [];
-			for (let fileID in Games.games) {
-				let game = Games.games[fileID];
-				if (!(Games.pastGames[room.name] && Games.pastGames[room.name].indexOf(game.name) !== -1) && !game.minigame && game.name !== "Pikachu's Pool Party" && game.name !== "PokeWars") {
-					console.log(game.name);
-					goodGames.push(game.name);
-				}
-			}
-			goodGames = Tools.shuffle(goodGames);
-			let realGoodGames = [];
-			for (let i = 0; i < 3; i++) {
-				realGoodGames.push(goodGames[i]);
-			}
-			room.say("Vote for the next game with ``" + Config.commandCharacter + "vote [game]!`` Chuffin suggests: " + realGoodGames.join(", "));
-			room.votes = new Map();
-			room.canVote = true;
-			room.timeout = setTimeout(() => room.doGame(), 30 * 1000);
-		} else {
-			room.vote(target, user);
-		}
-	},
-
-	steal: function (target, room, user) {
-		if (!room.game) return;
-		if (typeof room.game.steal === 'function') room.game.steal(target, user);
-	},
-
-	count: function (target, room, user) {
-		if (!room.game) {
-			if ((!user.hasRank(room, '+') && room !== user) || Tools.toId(target) !== "start") {
-				return;
-			}
-			Games.createMiniGame("count", room);
-		} else if (typeof room.game.count === 'function') {
-			room.game.count(target, user);
-		}
-	},
-	sit: function (target, room, user) {
-		if (!room.game) return;
-		if (typeof room.game.sit === 'function') room.game.sit(target, user);
-	},
-
-	pick: function (target, room, user) {
-		if (!room.game) return;
-		if (typeof room.game.pick === 'function') room.game.pick(target, user);
-	},
-
-	play: function (target, room, user) {
-		if (!room.game) return;
-		if (typeof room.game.play === 'function') room.game.play(target, user);
-	},
-
-	coins: function (target, room, user) {
-		if (!room.game) return;
-		if (typeof room.game.getCoins === 'function') room.game.getCoins(user);
-	},
-
-	stars: function (target, room, user) {
-		if (!room.game) return;
-		if (typeof room.game.getStars === 'function') room.game.getStars(user);
-	},
-
-	exclude: function (target, room, user) {
-		if (!room.game) return;
-		if (typeof room.game.exclude === 'function') room.game.exclude(target, user);
-	},
-
-	leaveshop: function (target, room, user) {
-		if (!room.game) return;
-		if (typeof room.game.leaveshop === 'function') room.game.leaveshop(user);
-	},
-
-	buy: function (target, room, user) {
-		if (!room.game) return;
-		if (typeof room.game.buy === 'function') room.game.buy(target, user);
-	},
-
-	guessExclude: 'ge',
-	ge: function (target, room, user) {
-		if (!room.game) return;
-		if (typeof room.game.ge === 'function') room.game.ge(target, user);
-	},
-
-	games: function (target, room, user) {
-		if (!user.isDeveloper() && !user.hasRank(room, '+')) return;
-		this.say("List of games: http://hastebin.com/moruzomaye.md");
-	},
-
-	hit: function (target, room, user) {
-		if (!room.game) return;
-		if (typeof room.game.hit === 'function') room.game.hit(target, user);
 	},
 
 	destroy: function (target, room, user) {
@@ -370,23 +307,6 @@ let commands = {
 		if (typeof room.game.hand === 'function') room.game.hand(target, user);
 	},
 
-	yes: 'y',
-	y: function (target, room, user) {
-		if (!room.game) return;
-		if (typeof room.game.yes === 'function') room.game.yes(user);
-	},
-
-	no: 'n',
-	n: function (target, room, user) {
-		if (!room.game) return;
-		if (typeof room.game.no === 'function') room.game.no(user);
-	},
-
-	nominate: 'nom',
-	nom: function (target, room, user) {
-		if (!room.game) return;
-		if (typeof room.game.nom === 'function') room.game.nom(target, user);
-	},
 	eliminate: 'elim',
 	elim: function (target, room, user) {
 		if (!room.game) return;
@@ -403,116 +323,9 @@ let commands = {
 		if (typeof room.game.cap === 'function') room.game.cap(target);
 	},
 
-	order: function (target, room, user) {
-		if (!user.hasRank(room, '+')) return;
-		Games.createMiniGame("order", room);
-	},
-
-	il: function (target, room, user) {
-		if (!user.hasRank(room, '+')) return;
-		Games.createMiniGame("il", room);
-	},
-
-	mashup: function (target, room, user) {
-		if ((!user.hasRank(room, '+') && room !== user) || room.game) return;
-		Games.createMiniGame("mashup", room);
-	},
-
-	dobattle: function (target, room, user) {
-		if (!user.isDeveloper()) return;
-		Client.send('|/utm null');
-	},
-
-	jointourney: function (target, room, user) {
-		if (!user.isDeveloper()) return;
-		room.say("/tour join");
-	},
-
-	git: function (target, room, user) {
-		if (!user.hasRank(room, '+')) return;
-		room.say("Git source code: www.github.com/CheeseMuffin/BotStuff");
-	},
-
-	bits: 'points',
-	points: function (target, room, user) {
-		if (room !== user) return;
-		let targetUserid = target ? Tools.toId(target) : user.id;
-		let points = [];
-		user.rooms.forEach((rank, room) => {
-			if (!(room.id in Storage.databases) || !('leaderboard' in Storage.databases[room.id])) return;
-			if (targetUserid in Storage.databases[room.id].leaderboard) points.push("**" + room.id + "**: " + Storage.databases[room.id].leaderboard[targetUserid].points);
-		});
-		if (!points.length) return this.say((target ? target.trim() + " does not" : "You do not") + " have points on any leaderboard.");
-		this.say(points.join(" | "));
-	},
-
-	topbits: 'top',
-	top: function (target, room, user) {
-		if (!user.hasRank(room, '+') && room !== user) return;
-		if (!target) target = 'groupchat-ladymonita-theworkshop';
-		if (!(target in Storage.databases) || !('leaderboard' in Storage.databases[target])) return;
-		let items = Object.keys(Storage.databases[target].leaderboard).map(function (key) {
-			return [key, Storage.databases[target].leaderboard[key].points];
-		});
-		let strs = [];
-		let realNum = 5;
-		if (realNum > items.length) {
-			realNum = items.length;
-		}
-		for (let i = Math.max(0, realNum - 5); i < realNum; i++) {
-			strs.push(i + 1 + Tools.getSuffix(i + 1) + ": __" + items[i][0] + "__(" + items[i][1] + ")");
-		}
-		room.say("``Top " + realNum + " of " + items.length + "``: " + strs.join(", "));
-	},
-
-	chieve: function (target, room, user) {
-		if (!user.hasRank(room, '+') && room.name !== user.name) return;
-		fs.readFile("chieveList.txt", function (err, data) {
-			if (err) {
-				console.error(err);
-			}
-			data = JSON.parse(data);
-			let found = false;
-			for (let name in data) {
-				if (Tools.toId(name) === Tools.toId(target)) {
-					room.say(name + ": " + data[name]);
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				room.say("Please enter a valid achievement.");
-			}
-		});
-	},
-
 	say: function (target, room, user) {
 		if (!user.isDeveloper()) return;
 		room.say(target);
-	},
-
-	chieves: function (target, room, user) {
-		if (!user.hasRank(room, '+') && room !== user) return;
-		fs.readFile("chieves.txt", function (err, data) {
-			let userID;
-			if (target) {
-				userID = target;
-			} else {
-				userID = user.name;
-			}
-			let found = false;
-			data = JSON.parse(data);
-			for (let key in data) {
-				if (Tools.toId(userID) === Tools.toId(key)) {
-					room.say((userID === user.name ? "Your " : userID + "'s ") + "achievements: " + data[key].join(", "));
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				room.say(userID + " hasn't unlocked any achievements.");
-			}
-		});
 	},
 };
 

@@ -170,7 +170,7 @@ class Client {
 		case 'pm':
 			let user = Users.add(splitMessage[0]);
 			if (!user) return;
-			if (user.id === Users.self.id) return;
+			//if (user.id === Users.self.id) return;
 			CommandParser.parse(splitMessage.slice(2).join('|'), user, user);
 			break;
 		default:
