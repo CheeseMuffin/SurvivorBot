@@ -39,8 +39,6 @@ global.Storage = require('./storage.js');
 Storage.importDatabases();
 
 global.Commands = require('./commands.js');
-global.Tournaments = require('./tournaments.js');
-global.Battles = require('./Battles.js');
 
 let plugins = fs.readdirSync('./plugins');
 for (let i = 0, len = plugins.length; i < len; i++) {
